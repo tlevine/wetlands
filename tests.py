@@ -7,22 +7,25 @@ from dumptruck import DumpTruck
 import os
 
 import excavate
+# Hack for faster runnig
+excavate.dt = DumpTruck(
+    dbname = '/tmp/wetlands.sqlite',
+    auto_commit = False
+)
 
 class DummyBucket:
-    bucket = 'dummy'
-    motherbucket = 'rocket scientist'
-    def __init__(self, *args, **kwargs):
-        self.init_params = [args, kwargs]
-
-    def tojson(self):
-        return [[],{}]
+    bucket = 'DummyBucket'
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        self.kwargs.pop('kwargs', None)
 
 class BaseBag(unittest.TestCase):
     def setUp(self):
         excavate.dt.drop('_bag', if_exists = True)
-        self.bag = excavate.Bag()
-        self.bucket = DummyBucket()
+        self.bag = excavate.Bag(buckets = [DummyBucket])
+        self.bucket = DummyBucket(motherbucket = u'RocketScientistBucket')
 
+class TestBagAdd(BaseBag):
     def test_add(self):
         self.bag.add(self.bucket)
         self.bag.add(self.bucket)
@@ -30,11 +33,19 @@ class BaseBag(unittest.TestCase):
         self.bag.add(self.bucket)
         observed = excavate.dt.dump('_bag')
         expected = [{
-            u'Bucket': u'dummy',
-            u'MotherBucket': u'rocket scientist',
-            u'__init__': [[], {}],
+            u'Bucket': u'DummyBucket',
+            u'MotherBucket': u'RocketScientistBucket',
+            u'kwargs': {u'motherbucket': u'RocketScientistBucket'},
         }] * 4
         self.assertEqual(observed, expected)
+
+class TestBagAddPop(BaseBag):
+    def test_add_pop(self):
+        original = self.bucket
+        self.bag.add(self.bucket)
+        popped = self.bag.pop()
+        self.assertDictEqual(original.kwargs, popped.kwargs)
+        self.assertListEqual([], excavate.dt.dump('_bag'))
 
 if __name__ == '__main__':
     unittest.main()

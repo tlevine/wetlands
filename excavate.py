@@ -7,30 +7,33 @@ dt = DumpTruck(
 
 class Bag:
     "A fancier stack, at some point"
-    def __init__(self, startingstack = [], table_name = '_bag'):
+    def __init__(self, buckets = [], table_name = '_bag'):
         self._table_name = table_name
+        self.buckets = {Bucket.bucket: Bucket for Bucket in buckets}
         dt.create_table({
             'Bucket': 'Bucket',
             'MotherBucket': 'MotherBucket',
-            '__init__': [[], {}],
+            'kwargs': {},
         }, self._table_name, if_not_exists = True)
-        try:
-            assert self.__len__() > 0
-        except:
-            for element in startingstack:
-                self.add(element)
 
     def add(self, element):
         dt.insert({
-            'Bucket': element.bucket,
-            'MotherBucket': element.motherbucket,
-            '__init__': element.init_params,
+            u'Bucket': element.bucket,
+            u'MotherBucket': element.kwargs.get('motherbucket', None),
+            u'kwargs': element.kwargs,
+
         }, self._table_name)
 
     def pop(self):
-        results = dt.execute('SELECT * FROM `%s` LIMIT 1' % self._table_name)
+        sql1 = 'SELECT rowid, Bucket, MotherBucket, kwargs FROM `%s` LIMIT 1' % self._table_name
+        sql2 = 'DELETE FROM `%s` WHERE rowid = ?' % self._table_name
+        results = dt.execute(sql1)
+        dt.execute(sql2, results['rowid'])
         if len(results) == 0:
-            pass
+            return None
+        else:
+            bucket_params = results[0]
+            return self.buckets[bucket_params['Bucket']](**bucket_params['kwargs'])
 
 class Bucket:
     "The base getter scraper class"
