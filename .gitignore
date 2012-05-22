@@ -1,0 +1,4 @@
+*.sqlite
+*.db
+*.py[c]
+*.sw[op]
