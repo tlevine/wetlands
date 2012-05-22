@@ -7,7 +7,7 @@ dt = DumpTruck(
 
 class Bag:
     "A fancier stack, at some point"
-    def __init__(self, buckets = [], create_foreign_keys, table_name = '_bag'):
+    def __init__(self, buckets = [], table_name = '_bag'):
         self._table_name = table_name
 
         # So we can initialize them
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXSTS `%s` (
             dt.execute(sql2)
             return self.buckets[bucket_params['Bucket']](**bucket_params['kwargs'])
 
-class Bucket:
+class BucketMold:
     "The base getter scraper class"
     bucket = 'Bucket'
 
@@ -76,49 +76,39 @@ class Bucket:
 
     def go(self):
         blob = self.load()
-        morepages = self.parse(textblob)
+        childbuckets = self.parse(textblob)
+        ancestry = [{'kwargs': cb.kwargs, 'motherkwargs': self.kwargs for cb in childbuckets]
+        dt.insert(ancestry, self.bucket)
         return morepages
 
-def seed(stacklist):
+def excavate(bucketclasses = [], startingbuckets = []):
     "Start everything."
-    stack = Stack(stacklist)
 
-    while len(stack) > 0:
-        try:
-            add_to_stack = stack.last().go()
-        except Exception:
-            raise
-        else:
-            stack.pop()
-            if add_to_stack != None:
-                stack.extend(add_to_stack)
+    # Bucket classes (page types)
+    if bucketclasses == []:
+        for g in globals().values():
+            if isinstance(g, BucketMold) and g != BucketMold:
+                bucketclasses.append(g)
+    bag = Bag(buckets = bucketclasses)
+
+    # The seed buckets
+    for b in startingbuckets:
+        bag.add(b)
+
+    # Go
+    while True:
+        currentbucket = bag.pop()
+
+        if currentbucket == None:
+            break
+
+        for newbucket in currentbucket.go():
+            bag.add(newbucket)
+
+        # Commit at the end in case of errors.
+        dt.commit()
 
 # --------------------------------------------------
 # End Bucket-Wheel
 # --------------------------------------------------
 
-URLS={
-  "main":"http://www.nedbank.co.za/website/content/map/branches.asp"
-, "suburbs-base":"http://www.nedbank.co.za/website/content/map/getSuburbs.asp?q="
-, "cities-base":"http://www.nedbank.co.za/website/content/map/getData.asp?q="
-}
-
-class Get(Bucket):
-    def __init__(self, url):
-        self.url = url
-
-    def load(self):
-        randomsleep()
-        return requests.get(self.url).text
-
-class Menu(Get):
-    "Returns provinces"
-    def parse(self, text):
-        x=fromstring(text)
-        provinces=options(x.xpath('id("province")')[0],valuename="provinceId",textname="provinceName",ignore_value="0")
-        for province in provinces:
-            province['provinceUrl'] = URLS['suburbs-base'] + province['provinceId']
-            province['scraperrun'] = scraperrun
-
-        save(['provinceUrl', 'scraperrun'], provinces, 'provinces')
-        return [Province(p['provinceUrl']) for p in provinces]
