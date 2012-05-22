@@ -7,38 +7,75 @@ dt = DumpTruck(
 
 class Bag:
     "A fancier stack, at some point"
-    def __init__(self, buckets = [], table_name = '_bag'):
+    def __init__(self, buckets = [], create_foreign_keys, table_name = '_bag'):
         self._table_name = table_name
+
+        # So we can initialize them
         self.buckets = {Bucket.bucket: Bucket for Bucket in buckets}
-        dt.create_table({
-            'Bucket': 'Bucket',
-            'MotherBucket': 'MotherBucket',
-            'kwargs': {},
-        }, self._table_name, if_not_exists = True)
+
+        # Set up hierarchical relationships
+        for bucket in buckets:
+            if bucket.motherbucket() == None:
+                dt.execute('''
+CREATE TABLE IF NOT EXISTS `%(bucket)s` (
+  kwargs JSON TEXT,
+  UNIQUE(kwargs),
+) ''' % {'bucket':bucket.bucket})
+            else:
+                dt.execute('''
+CREATE TABLE IF NOT EXISTS `%(bucket)s` (
+  kwargs JSON TEXT,
+  motherkwargs JSON TEXT,
+  UNIQUE(kwargs),
+  FOREIGN KEY(motherkwargs) REFERENCES `%(motherbucket)s`(`kwargs`)
+) ''' % {'bucket':bucket.bucket, 'motherbucket': bucket.motherbucket()})
+
+        # The bag table
+        dt.execute('''
+CREATE TABLE IF NOT EXSTS `%s` (
+  pk INTEGER PRIMARY KEY,
+  Bucket TEXT,
+  MotherBucket TEXT,
+  kwargs JSON TEXT
+ )''')
 
     def add(self, element):
         dt.insert({
             u'Bucket': element.bucket,
             u'MotherBucket': element.kwargs.get('motherbucket', None),
             u'kwargs': element.kwargs,
-
         }, self._table_name)
 
     def pop(self):
-        sql1 = 'SELECT rowid, Bucket, MotherBucket, kwargs FROM `%s` LIMIT 1' % self._table_name
+        sql1 = 'SELECT * FROM `%s` LIMIT 1' % self._table_name
         results = dt.execute(sql1)
         if len(results) == 0:
             return None
         else:
             bucket_params = results[0]
-            sql2 = 'DELETE FROM `%s` WHERE rowid = %d' % (self._table_name, bucket_params['rowid'])
+            sql2 = 'DELETE FROM `%s` WHERE pk = %d' % (self._table_name, bucket_params['pk'])
             dt.execute(sql2)
             return self.buckets[bucket_params['Bucket']](**bucket_params['kwargs'])
 
 class Bucket:
     "The base getter scraper class"
+    bucket = 'Bucket'
+
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        self.kwargs.pop('kwargs', None)
+
+    def motherbucket(self):
+        return self.kwargs['motherbucket']
+
+    def load(self):
+        raise NotImplementedError('You need to implement the load function for this bucket')
+
+    def parse(self, text):
+        raise NotImplementedError('You need to implement the load function for this bucket')
+
     def go(self):
-        textblob = self.load()
+        blob = self.load()
         morepages = self.parse(textblob)
         return morepages
 
