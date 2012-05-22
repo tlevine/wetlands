@@ -14,8 +14,8 @@ class Bag:
         self.buckets = {Bucket.bucket: Bucket for Bucket in buckets}
 
         # Set up hierarchical relationships
-        for bucket in buckets:
-            if bucket.motherbucket() == None:
+        for bucket in self.buckets.keys():
+            if self.buckets[bucket].motherbucket == None:
                 dt.execute('''
 CREATE TABLE IF NOT EXISTS `%(bucket)s` (
   kwargs JSON TEXT,
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `%(bucket)s` (
   motherkwargs JSON TEXT,
   UNIQUE(kwargs),
   FOREIGN KEY(motherkwargs) REFERENCES `%(motherbucket)s`(`kwargs`)
-) ''' % {'bucket':bucket.bucket, 'motherbucket': bucket.motherbucket()})
+) ''' % {'bucket':bucket.bucket, 'motherbucket': bucket.motherbucket})
 
         # The bag table
         dt.execute('''
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXSTS `%s` (
     def add(self, element):
         dt.insert({
             u'Bucket': element.bucket,
-            u'MotherBucket': element.kwargs.get('motherbucket', None),
+            u'MotherBucket': element.motherbucket,
             u'kwargs': element.kwargs,
         }, self._table_name)
 
@@ -60,13 +60,10 @@ CREATE TABLE IF NOT EXSTS `%s` (
 class BucketMold:
     "The base getter scraper class"
     bucket = 'Bucket'
+    motherbucket = None
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
-        self.kwargs.pop('kwargs', None)
-
-    def motherbucket(self):
-        return self.kwargs['motherbucket']
 
     def load(self):
         raise NotImplementedError('You need to implement the load function for this bucket')
@@ -77,7 +74,7 @@ class BucketMold:
     def go(self):
         blob = self.load()
         childbuckets = self.parse(textblob)
-        ancestry = [{'kwargs': cb.kwargs, 'motherkwargs': self.kwargs for cb in childbuckets]
+        ancestry = [{'kwargs': cb.kwargs, 'motherkwargs': self.kwargs} for cb in childbuckets]
         dt.insert(ancestry, self.bucket)
         return morepages
 
@@ -111,4 +108,3 @@ def excavate(bucketclasses = [], startingbuckets = []):
 # --------------------------------------------------
 # End Bucket-Wheel
 # --------------------------------------------------
-

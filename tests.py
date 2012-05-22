@@ -14,10 +14,13 @@ excavate.dt = DumpTruck(
 )
 
 class DummyBucket:
-    bucket = 'DummyBucket'
+    bucket = u'DummyBucket'
     def __init__(self, **kwargs):
         self.kwargs = kwargs
         self.kwargs.pop('kwargs', None)
+
+    def motherbucket(self):
+        return u'RocketScientistBucket'
 
 class BaseBag(unittest.TestCase):
     def setUp(self):
