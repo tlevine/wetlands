@@ -26,13 +26,13 @@ class Bag:
 
     def pop(self):
         sql1 = 'SELECT rowid, Bucket, MotherBucket, kwargs FROM `%s` LIMIT 1' % self._table_name
-        sql2 = 'DELETE FROM `%s` WHERE rowid = ?' % self._table_name
         results = dt.execute(sql1)
-        dt.execute(sql2, results['rowid'])
         if len(results) == 0:
             return None
         else:
             bucket_params = results[0]
+            sql2 = 'DELETE FROM `%s` WHERE rowid = %d' % (self._table_name, bucket_params['rowid'])
+            dt.execute(sql2)
             return self.buckets[bucket_params['Bucket']](**bucket_params['kwargs'])
 
 class Bucket:
