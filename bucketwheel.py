@@ -1,4 +1,5 @@
 from dumptruck import DumpTruck
+import datetime
 
 dt = DumpTruck(
     dbname = 'wetlands.sqlite',
@@ -18,14 +19,14 @@ class Bag:
             if bucket.motherbucket == None:
                 dt.execute('''
 CREATE TABLE IF NOT EXISTS `{bucket}` (
-  kwargs JSON,
+  kwargs JSON NOT NULL,
   UNIQUE(kwargs)
 ) '''.format(bucket= bucket.bucket))
             else:
                 dt.execute('''
 CREATE TABLE IF NOT EXISTS `{bucket}` (
-  kwargs JSON,
-  motherkwargs JSON,
+  kwargs JSON NOT NULL,
+  motherkwargs JSON NOT NULL,
   UNIQUE(kwargs),
   FOREIGN KEY(motherkwargs) REFERENCES `{motherbucket}`(`kwargs`)
 ) '''.format(bucket= bucket.bucket, motherbucket= bucket.motherbucket))
@@ -34,9 +35,9 @@ CREATE TABLE IF NOT EXISTS `{bucket}` (
         dt.execute('''
 CREATE TABLE IF NOT EXISTS `%s` (
   pk INTEGER PRIMARY KEY,
-  Bucket TEXT,
+  Bucket TEXT NOT NULL,
   MotherBucket TEXT,
-  kwargs JSON
+  kwargs JSON NOT NULL
  )''' % self._table_name)
 
     def add(self, element):
@@ -59,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `%s` (
 
 class BucketMold:
     "The base getter scraper class"
-    bucket = 'Bucket'
+    bucket = 'BucketMold'
     motherbucket = None
 
     def __init__(self, **kwargs):
@@ -77,6 +78,15 @@ class BucketMold:
         ancestry = [{'kwargs': cb.kwargs, 'motherkwargs': self.kwargs} for cb in childbuckets]
         dt.insert(ancestry, self.bucket)
         return morepages
+
+
+
+
+try:
+    scraper_run = dt.get_var('scraper_run')
+except:
+    scraper_run = datetime.date.today().isoformat()
+    dt.save_var('scraper_run', scraper_run)
 
 def excavate(bucketclasses = [], startingbuckets = []):
     "Start everything."
@@ -105,3 +115,4 @@ def excavate(bucketclasses = [], startingbuckets = []):
         # Commit at the end in case of errors.
         dt.commit()
 
+dt.drop('_dumptruckvars') # Hack to refresh the scraper_run
