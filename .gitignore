@@ -1,4 +1,10 @@
+# Data
 *.sqlite
+*-journal
+*.pdf
+*.html
+
+# Development
 *.db
 *.py[c]
 *.sw[op]
