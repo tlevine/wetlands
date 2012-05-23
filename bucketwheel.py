@@ -78,7 +78,7 @@ class BucketMold:
         dt.insert(ancestry, self.bucket)
         return morepages
 
-def excavate(bucketclasses = [], startingbuckets = []):
+def excavate(startingbuckets = [], bucketclasses = []):
     "Start everything."
 
     # Bucket classes (page types)
