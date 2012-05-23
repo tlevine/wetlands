@@ -118,3 +118,26 @@ Architecture
 The program uses a simple message queue (`bucketwheel.py`) running
 on top of SQLite. The queue makes writing the scraper convenient,
 but it is not threadsafe, just so you know.
+
+Tables are mapped to Python classes, one class for each type of document.
+This is not done properly with meta classes, so setting this up
+involves a few hacks.
+
+Loading and parsing of each particular document is handled
+
+But *do not run two instances of this in the same environment*;
+that may mess up the data.
+
+
+### Size
+
+I ran this on May 23, 2012 and wound up with with 100 megabytes
+of pdf downloads and a 268-megabyte database. (Those 268 megabytes
+include two copies of each download plus metadata and several
+reformatted versions.) We won't hit filesystem limits for a while,
+but the database might start to get slow soon; if we add 300 megabytes
+to the database each day, we can expect it to reach 100 gigabytes in a year.
+
+A simple solution would be run the database in RAM (which I have 16
+gigabytes of) and split it up into monthly or weekly subsets, which
+might make backups easier anyway.
