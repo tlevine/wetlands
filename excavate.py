@@ -1,4 +1,5 @@
 import os
+import base64
 from dumptruck import DumpTruck
 from urllib2 import urlopen, URLError
 from bucketwheel import * # Sorry
@@ -20,18 +21,19 @@ class Get(BucketMold):
                 raw = urlopen(url, 'rb').read()
             except URLError:
                 sleep(WAIT**RETRIES)
+        self.datetime_scraped = datetime.datetime.now()
 
         dt.insert({
             u'scraper_run': scraper_run,
             u'Bucket': self.bucket,
             u'kwargs': self.kwargs,
             u'url': url,
-            u'datetime_scraped': datetime.datetime.now(),
+            u'datetime_scraped': self.datetime_scraped,
             u'raw': base64.b64encode(raw)
         })
 
         # Filesystem save (inefficient but convenient)
-        os.system(bash % {'url': url})
+        os.system(self.bash % {'url': url})
 
         return raw
 
@@ -142,6 +144,10 @@ curl %(url)s > """ + scraper_run + '.html'
             if not re.match(r'\d{3}-\d{3}-\d{4}', row['Project Manager Phone']):
                 msg = 'This is a strange phone number: %s' % row['Project Manager Phone']
                 RRRaise(AssertionError(msg))
+
+            # References
+            row.update(self.references)
+            row['date_scraped'] = self.date_scraped
 
             # Append to our big lists
             data.append(row)
