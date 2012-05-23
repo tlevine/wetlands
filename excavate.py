@@ -12,7 +12,10 @@ class RegulatoryPage(BucketMold):
         raise NotImplementedError('You need to implement the load function for this bucket')
 
 
-excavate([RegulatoryPage(
-  url = 'http://www.mvn.usace.army.mil'
-  '/ops/regulatory/publicnotices.asp?ShowLocationOrder=False'
-)])
+excavate(
+  startingbuckets = [RegulatoryPage(
+    url = 'http://www.mvn.usace.army.mil'
+    '/ops/regulatory/publicnotices.asp?ShowLocationOrder=False'
+  )],
+  bucketclasses = [RegulatoryPage]
+)

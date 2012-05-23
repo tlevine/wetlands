@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `%s` (
         }, self._table_name)
 
     def pop(self):
-        sql1 = 'SELECT * FROM `%s` LIMIT 1' % self._table_name
+        sql1 = 'SELECT pk, Bucket, MotherBucket, kwargs FROM `%s` LIMIT 1' % self._table_name
         results = dt.execute(sql1)
         if len(results) == 0:
             return None
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `%s` (
             bucket_params = results[0]
             sql2 = 'DELETE FROM `%s` WHERE pk = %d' % (self._table_name, bucket_params['pk'])
             dt.execute(sql2)
-            return self.buckets[bucket_params['Bucket']](**bucket_params['kwargs'])
+            return self.buckets[bucket_params[u'Bucket']](**bucket_params['kwargs'])
 
 class BucketMold:
     "The base getter scraper class"
@@ -78,7 +78,7 @@ class BucketMold:
         dt.insert(ancestry, self.bucket)
         return morepages
 
-def excavate(startingbuckets = [], bucketclasses = []):
+def excavate(bucketclasses = [], startingbuckets = []):
     "Start everything."
 
     # Bucket classes (page types)
