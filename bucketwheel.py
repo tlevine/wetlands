@@ -77,6 +77,7 @@ class BucketMold:
 
     def go(self):
         blob = self.load()
+        self.reference = {'scraper_run': scraper_run, 'kwargs': kwargs} #For linking other data
         childbuckets = self.parse(textblob)
         ancestry = [{
             'scraper_run': scraper_run,

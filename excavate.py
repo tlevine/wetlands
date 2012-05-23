@@ -24,7 +24,7 @@ class Get(BucketMold):
         dt.insert({
             'scraper_run': scraper_run,
             'Bucket': self.bucket,
-            'kwargs': self.kwargs
+            'kwargs': self.kwargs,
             'url': url,
             'datetime_scraped': datetime.datetime.now(),
             'raw': raw
@@ -55,6 +55,9 @@ curl %(url)s > """ + scraper_run + '.html'
     def parse(self, text):
         html = fromstring(text)
         table = onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"')
+        trs = table.xpath('tr')
+        header = trs.pop(0)
+        
 
         raise NotImplementedError('You need to implement the load function for this bucket')
 
