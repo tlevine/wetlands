@@ -248,79 +248,91 @@ class Drawings(PdfDownload):
     bucket = 'Drawings'
 
 if __name__ == '__main__':
-    # Store raw downloads in a table
-    dt.execute('''
-    CREATE TABLE IF NOT EXISTS raw_files (
-      scraper_run DATE NOT NULL,
-      Bucket TEXT NOT NULL,
-      kwargs JSON NOT NULL,
-      url TEXT NOT NULL,
+    # Run only once per day
+    new_run = dt.execute('select count(*) as "c" from _bag')[0]['c'] == 0
+    prev_run = dt.execute('select max(scraper_run) as "sr" from Listing')[0]['sr']
+    if new_run and prev_run == scraper_run:
+        print("I already finished running today, so I'm stopping now.")
+ 
+   else:
+        if new_run:
+            print('Starting a new run! The last run was on %s' % prev_run)
+        else:
+            print('Resuming the partial run from %s' % prev_run)
 
-      datetime_scraped DATETIME NOT NULL,
-      raw BASE64 TEXT NOT NULL,
-
-      UNIQUE(scraper_run, Bucket, kwargs)
-      UNIQUE(scraper_run, Bucket, url)
-    )''')
-
-    # Data associated with the listing page
-    dt.execute('''
-    CREATE TABLE IF NOT EXISTS ListingData (
-      scraper_run DATE NOT NULL,
-      kwargs JSON NOT NULL,
-      datetime_scraped DATETIME NOT NULL,
-      url TEXT NOT NULL,
-      
-      [Project Description] TEXT NOT NULL,
-      Applicant TEXT NOT NULL,
-      [Public Notice Date] DATETIME NOT NULL,
-      [Expiration Date] DATETIME NOT NULL,
-      [PermitApplication No.] TEXT NOT NULL,
-      [Public Notice] TEXT NOT NULL,
-      [Drawings] TEXT,
-      [Location] TEXT,
-      [Project Manager Email] TEXT NOT NULL,
-      [Project Manager Name] TEXT NOT NULL,
-      [Project Manager Phone] TEXT NOT NULL,
-
-      UNIQUE(scraper_run, [PermitApplication No.]),
-      UNIQUE(scraper_run, [Public Notice]),
-      UNIQUE(scraper_run, Drawings)
-    )''')
-
-    # Data associated with the pdf downloads
-    pdf_download_schema = '''
-    CREATE TABLE IF NOT EXISTS [%(name)s Download] (
-      scraper_run DATE NOT NULL,
-      kwargs JSON NOT NULL,
-      datetime_scraped DATETIME NOT NULL,
-      url TEXT NOT NULL,
-      [PermitApplication No.] TEXT NOT NULL,
-
-      b64 BASE64 TEXT NOT NULL,
-      xml TEXT NOT NULL,
-      text TEXT NOT NULL,
-
-      UNIQUE(scraper_run, kwargs),
-      FOREIGN KEY(scraper_run, kwargs)
-        REFERENCES [%(name)s](scraper_run, kwargs),
-
-      UNIQUE(scraper_run, [PermitApplication No.]),
-      FOREIGN KEY(scraper_run, [PermitApplication No.])
-        REFERENCES `ListingData`(scraper_run, [PermitApplication No.]),
-
-      UNIQUE(scraper_run, url),
-      FOREIGN KEY(scraper_run, url)
-        REFERENCES `ListingData`(scraper_run, [%(name)s])
-    )'''
-
-    for bucket in ['Drawings', 'Public Notice']:
-       dt.execute(pdf_download_schema % {'name': bucket})
-
-    excavate(
-      startingbuckets = [Listing(
-        url = 'http://www.mvn.usace.army.mil'
-        '/ops/regulatory/publicnotices.asp?ShowLocationOrder=False'
-      )],
-      bucketclasses = [Listing, PublicNotice, Drawings]
-    )
+        # Store raw downloads in a table
+        dt.execute('''
+        CREATE TABLE IF NOT EXISTS raw_files (
+          scraper_run DATE NOT NULL,
+          Bucket TEXT NOT NULL,
+          kwargs JSON NOT NULL,
+          url TEXT NOT NULL,
+ 
+          datetime_scraped DATETIME NOT NULL,
+          raw BASE64 TEXT NOT NULL,
+ 
+          UNIQUE(scraper_run, Bucket, kwargs)
+          UNIQUE(scraper_run, Bucket, url)
+        )''')
+ 
+        # Data associated with the listing page
+        dt.execute('''
+        CREATE TABLE IF NOT EXISTS ListingData (
+          scraper_run DATE NOT NULL,
+          kwargs JSON NOT NULL,
+          datetime_scraped DATETIME NOT NULL,
+          url TEXT NOT NULL,
+          
+          [Project Description] TEXT NOT NULL,
+          Applicant TEXT NOT NULL,
+          [Public Notice Date] DATETIME NOT NULL,
+          [Expiration Date] DATETIME NOT NULL,
+          [PermitApplication No.] TEXT NOT NULL,
+          [Public Notice] TEXT NOT NULL,
+          [Drawings] TEXT,
+          [Location] TEXT,
+          [Project Manager Email] TEXT NOT NULL,
+          [Project Manager Name] TEXT NOT NULL,
+          [Project Manager Phone] TEXT NOT NULL,
+ 
+          UNIQUE(scraper_run, [PermitApplication No.]),
+          UNIQUE(scraper_run, [Public Notice]),
+          UNIQUE(scraper_run, Drawings)
+        )''')
+ 
+        # Data associated with the pdf downloads
+        pdf_download_schema = '''
+        CREATE TABLE IF NOT EXISTS [%(name)s Download] (
+          scraper_run DATE NOT NULL,
+          kwargs JSON NOT NULL,
+          datetime_scraped DATETIME NOT NULL,
+          url TEXT NOT NULL,
+          [PermitApplication No.] TEXT NOT NULL,
+ 
+          b64 BASE64 TEXT NOT NULL,
+          xml TEXT NOT NULL,
+          text TEXT NOT NULL,
+ 
+          UNIQUE(scraper_run, kwargs),
+          FOREIGN KEY(scraper_run, kwargs)
+            REFERENCES [%(name)s](scraper_run, kwargs),
+ 
+          UNIQUE(scraper_run, [PermitApplication No.]),
+          FOREIGN KEY(scraper_run, [PermitApplication No.])
+            REFERENCES `ListingData`(scraper_run, [PermitApplication No.]),
+ 
+          UNIQUE(scraper_run, url),
+          FOREIGN KEY(scraper_run, url)
+            REFERENCES `ListingData`(scraper_run, [%(name)s])
+        )'''
+ 
+        for bucket in ['Drawings', 'Public Notice']:
+           dt.execute(pdf_download_schema % {'name': bucket})
+ 
+        excavate(
+          startingbuckets = [Listing(
+            url = 'http://www.mvn.usace.army.mil'
+            '/ops/regulatory/publicnotices.asp?ShowLocationOrder=False'
+          )],
+          bucketclasses = [Listing, PublicNotice, Drawings]
+        )
