@@ -97,6 +97,8 @@ curl %(url)s > """ + scraper_run + '.html'
 
         # List of dictionaries of data
         data = []
+        publicnotices = []
+        drawings = []
         for tr in trs:
             if len(tr.xpath('td')) != self.NCOL:
                 RRRaise(AssertionError('The table row does not have exactly %d cells.' % self.NCOL)
@@ -109,20 +111,43 @@ curl %(url)s > """ + scraper_run + '.html'
             row['Expiration Date'] = self.parsedate(row['Expiration Date'])
 
             # PDF download links
-            pdfkeys = set(tr.cssselect('td/a/text()'))
+            del(row['View or Download'])
+            pdfkeys = set(tr.xpath('td[position()=6]/a/text()'))
             if pdfkeys.issubset({'Public Notice', 'Drawings'}):
-                RRRaise(AssertionError('The has unexpected hyperlinks.')
+                RRRaise(AssertionError('The table row has unexpected hyperlinks.')
             if len(pdfkeys) == 0:
                 RRRaise(AssertionError('No pdf hyperlinks found.')
-
             for key in ['Public Notice', 'Drawings']:
                 row[key] = onenode(tr, 'td/a[text()="%s"]/@href' % key)
                 if row[key][:4] != 'pdf/':
                     RRRaise(AssertionError('The %s pdf link doesn\'t have the expected path.' % key))
 
-        # Now clean them.
-        for row in body:
-            dict(zip(header, 
+            # Project manager contact information
+            del(row['Project Manager'])
+            pm = onenode(tr, 'td[position()=8]')
+
+            # Email address
+            row['Project Manager Email'] = onenode(pm, 'a/@href')
+            if row['Project Manager Email'][:7] == 'mailto:':
+                row['Project Manager Email'] = row['Project Manager Email'][7:]
+            else:
+                msg = 'This is a strange email link: <%s>' % row['Project Manager Email']
+                RRRaise(AssertionError(msg))
+
+            # Name 
+            row['Project Manager Name'] = onenode(pm, 'a').strip()
+
+            # Phone number
+            row['Project Manager Phone'] = pm.xpath('text()')[-1].strip()
+            if not re.match(r'\d{3}-\d{3}-\d{4}', row['Project Manager Phone']):
+                msg = 'This is a strange phone number: %s' % row['Project Manager Phone']
+                RRRaise(AssertionError(msg))
+
+            # Append to our big lists
+            data.append(row)
+            cwd = 'http://www.mvn.usace.army.mil/ops/regulatory/'
+            publicnotices.append(PublicNotice(url = cwd + row['Public Notice'])
+            drawings.append(Drawing(url = cwd + row['Drawing']))
 
         raise NotImplementedError('You need to implement the load function for this bucket')
 
@@ -147,6 +172,33 @@ CREATE TABLE IF NOT EXISTS raw_files (
   UNIQUE(scraper_run, Bucket, kwargs)
   UNIQUE(scraper_run, Bucket, url)
 )''')
+
+dt.execute('''
+CREATE TABLE IF NOT EXISTS ListingData (
+  scraper_run DATE NOT NULL,
+  kwargs JSON NOT NULL,
+  datetime_scraped DATETIME NOT NULL,
+  
+  [Project Description] TEXT NOT NULL,
+  Applicant TEXT NOT NULL,
+  [Public Notice Date] DATETIME NOT NULL,
+  [Expiration Date] DATETIME NOT NULL,
+  [Permit Application No.] TEXT NOT NULL,
+  [Public Notice] TEXT NOT NULL,
+  [Drawings] TEXT NOT NULL,
+  Location TEXT NOT NULL,
+  [Project Manager Email] TEXT NOT NULL,
+  [Project Manager Name] TEXT NOT NULL,
+  [Project Manager Phone] TEXT NOT NULL,
+
+  FOREIGN KEY(scraper_run, kwargs) REFERENCES `Listing`(scraper_run, kwargs),
+  UNIQUE(scraper_run, kwargs),
+  UNIQUE([Public Notice]),
+  UNIQUE(Drawings),
+  UNIQUE([Permit Application No.])
+)''')
+
+
 excavate(
   startingbuckets = [RegulatoryPage(
     url = 'http://www.mvn.usace.army.mil'
