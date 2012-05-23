@@ -1,4 +1,6 @@
 # Data
+listing
+pdf
 *.sqlite
 *-journal
 *.pdf
