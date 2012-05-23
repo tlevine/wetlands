@@ -226,7 +226,10 @@ pdftoxml = lambda pdf: pdfto('xml',
 
 class PdfDownload(Get):
     motherbucket = 'Listing'
-    bash = "mkdir -p 'pdf/%(permit)s'; cd 'pdf/%(permit)s'; wget '%(url)s' >/dev/null 2>&1"
+    bash = '''
+mkdir -p 'pdf/%(permit)s/'"`date --rfc-3339 date`"
+cd !$; wget '%(url)s' >/dev/null 2>&1
+'''
 
     def parse(self, pdf):
         row = self.reference()
