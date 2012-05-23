@@ -19,12 +19,14 @@ class Bag:
             if bucket.motherbucket == None:
                 dt.execute('''
 CREATE TABLE IF NOT EXISTS `{bucket}` (
+  scraper_run DATE NOT NULL,
   kwargs JSON NOT NULL,
   UNIQUE(kwargs)
 ) '''.format(bucket= bucket.bucket))
             else:
                 dt.execute('''
 CREATE TABLE IF NOT EXISTS `{bucket}` (
+  scraper_run DATE NOT NULL,
   kwargs JSON NOT NULL,
   motherkwargs JSON NOT NULL,
   UNIQUE(kwargs),
@@ -75,7 +77,11 @@ class BucketMold:
     def go(self):
         blob = self.load()
         childbuckets = self.parse(textblob)
-        ancestry = [{'kwargs': cb.kwargs, 'motherkwargs': self.kwargs} for cb in childbuckets]
+        ancestry = [{
+            'scraper_run': scraper_run,
+            'kwargs': cb.kwargs,
+            'motherkwargs': self.kwargs
+        } for cb in childbuckets]
         dt.insert(ancestry, self.bucket)
         return morepages
 
