@@ -51,12 +51,11 @@ def RRRaise(exception):
 def onenode(html, xpath):
     nodes = html.xpath(xpath)
     if len(nodes) != 1:
-        raise ValueError('Not exactly one node')
+        RRRaise(AssertionError('Not exactly one node'))
     else:
         return nodes[0]
 
 class Listing(GET):
-
     bucket = 'Listing'
     motherbucket = None
     bash = """
@@ -64,16 +63,48 @@ mkdir -p listing
 cd listing
 curl %(url)s > """ + scraper_run + '.html'
 
+    NCOL = 8
+    COLNAMES = (
+        'Project Description',
+        'Applicant',
+        'Public Notice Date',
+        'Expiration Date',
+        'Permit Application No.',
+        'View or Download',
+        'Location',
+        'Project Manager'
+    )
+
     def parse(self, rawtext):
         # There are more data in the comments!
-        text_with_locations = rawtext.replace('<!--', '').replace('-->', '')
+        text_with_locations = rawtext.replace('<!--', '').replace('-->', '').replace('&nbsp;', ' ')
 
         html = fromstring(text_with_locations)
         table = onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"')
         trs = table.xpath('tr')
 
-        header = [td.text_content().strip() for td in trs.pop(0)]
-        if len(header) != 
+        # Getting the cells 
+        thead = [td.text_content().strip() for td in trs.pop(0)]
+        if len(thead) != self.NCOL:
+            RRRaise(AssertionError('The table header does not have exactly %d cells.' % self.NCOL)
+
+        if thead != self.COLNAMES:
+            RRRaise(AssertionError('The table header does not have the right names.')
+
+        tbody = [tr.xpath('td') for tr in trs]
+
+        # List of dictionaries of data
+        data = []
+        for tr in tbody:
+            if len(tr) != self.NCOL:
+                RRRaise(AssertionError('The table row does not have exactly %d cells.' % self.NCOL)
+
+            row = dict(zip(thead, [td.text_content().strip() for td in tr]))
+            row['Public Notice Date']
+
+        # Now clean them.
+        for row in body:
+            dict(zip(header, 
 
         raise NotImplementedError('You need to implement the load function for this bucket')
 
