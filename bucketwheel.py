@@ -21,6 +21,7 @@ class Bag:
 CREATE TABLE IF NOT EXISTS `{bucket}` (
   scraper_run DATE NOT NULL,
   kwargs JSON NOT NULL,
+  motherkwargs JSON,
   UNIQUE(scraper_run, kwargs)
 ) '''.format(bucket= bucket.bucket))
             else:
