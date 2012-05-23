@@ -33,11 +33,12 @@ class Get(BucketMold):
 
         return raw
 
-class RegulatoryPage(GET):
-    bucket = 'RegulatoryPage'
+class Listing(GET):
+    bucket = 'Listing'
+    motherbucket = None
     bash = """
-mkdir -p regulatorypage
-cd regulatoypage
+mkdir -p listing
+cd listing
 curl %(url)s > """ + scraper_run + '.html'
 
     def parse(self, text):
@@ -45,6 +46,7 @@ curl %(url)s > """ + scraper_run + '.html'
 
 class PdfDownload(BucketMold):
     bucket = 'PdfDownload'
+    motherbucket = 'Listing'
     bash = "mkdir -p pdf; cd pdf; wget '%(url)s'"
 
     def parse(self, text):
