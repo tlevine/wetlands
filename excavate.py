@@ -1,10 +1,12 @@
+#!/usr/bin/env python2
+import re
 import os
 import base64
 from dumptruck import DumpTruck
 from urllib2 import urlopen, URLError
+from unidecode import unidecode
+from lxml.html import fromstring, tostring
 from bucketwheel import * # Sorry
-
-from lxml.html import fromstring
 
 RETRIES = 5
 WAIT = 3 # seconds, raised to the retry
@@ -53,6 +55,7 @@ def RRRaise(exception):
 def onenode(html, xpath):
     nodes = html.xpath(xpath)
     if len(nodes) != 1:
+        print(map(tostring, nodes))
         RRRaise(AssertionError('Not exactly one node'))
     else:
         return nodes[0]
@@ -66,16 +69,18 @@ cd listing
 curl %(url)s > """ + scraper_run + '.html'
 
     NCOL = 8
-    COLNAMES = (
+    COLNAMES = [
         'Project Description',
         'Applicant',
         'Public Notice Date',
         'Expiration Date',
-        'Permit Application No.',
+#       'Permit Application No.',
+        'PermitApplication No.',
         'View or Download',
         'Location',
         'Project Manager'
-    )
+    ]
+    PHONE_NUMBER = re.compile(r'[^0-9]*(\d{3}-\d{3}-\d{4})[^0-9]*')
 
     @staticmethod
     def parsedate(rawdate):
@@ -84,17 +89,21 @@ curl %(url)s > """ + scraper_run + '.html'
     def parse(self, rawtext):
         # There are more data in the comments!
         text_with_locations = rawtext.replace('<!--', '').replace('-->', '').replace('&nbsp;', ' ')
-        unicodetext = text_with_locations.decode('utf-8')
+        unicodetext = unidecode(text_with_locations)
         html = fromstring(unicodetext)
-        table = onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"')
+        table = onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"]')
         trs = table.xpath('tr')
 
         # Getting the cells 
         thead = [td.text_content().strip() for td in trs.pop(0)]
         if len(thead) != self.NCOL:
+            print(thead)
             RRRaise(AssertionError('The table header does not have exactly %d cells.' % self.NCOL))
 
         if thead != self.COLNAMES:
+            pairs = zip(thead, self.COLNAMES)
+            for a, b in pairs:
+                print(a, b), 'Match' if a == b else 'Differ'
             RRRaise(AssertionError('The table header does not have the right names.'))
 
         # List of dictionaries of data
@@ -114,13 +123,15 @@ curl %(url)s > """ + scraper_run + '.html'
 
             # PDF download links
             del(row['View or Download'])
-            pdfkeys = set(tr.xpath('td[position()=6]/a/text()'))
-            if pdfkeys.issubset({'Public Notice', 'Drawings'}):
+            pdfkeys = set(tr.xpath('td[position()=6]/descendant::a/text()'))
+            if not pdfkeys.issubset({'Public Notice', 'Drawings'}):
+                print(pdfkeys)
                 RRRaise(AssertionError('The table row has unexpected hyperlinks.'))
             if len(pdfkeys) == 0:
-                RRRaise(AssertionError('No pdf hyperlinks found.'))
+                print row
+                RRRaise(AssertionError('No pdf hyperlinks found for permit %s.' % row['PermitApplication No.']))
             for key in ['Public Notice', 'Drawings']:
-                row[key] = onenode(tr, 'td/a[text()="%s"]/@href' % key)
+                row[key] = onenode(tr, 'td/descendant::a[text()="%s"]/@href' % key)
                 if row[key][:4] != 'pdf/':
                     RRRaise(AssertionError('The %s pdf link doesn\'t have the expected path.' % key))
 
@@ -129,7 +140,12 @@ curl %(url)s > """ + scraper_run + '.html'
             pm = onenode(tr, 'td[position()=8]')
 
             # Email address
-            row['Project Manager Email'] = onenode(pm, 'a/@href')
+            try:
+                row['Project Manager Email'] = onenode(pm, 'descendant::a/@href')
+            except AssertionError:
+                print(row)
+                raise
+
             if row['Project Manager Email'][:7] == 'mailto:':
                 row['Project Manager Email'] = row['Project Manager Email'][7:]
             else:
@@ -137,31 +153,48 @@ curl %(url)s > """ + scraper_run + '.html'
                 RRRaise(AssertionError(msg))
 
             # Name 
-            row['Project Manager Name'] = onenode(pm, 'a').strip()
+            row['Project Manager Name'] = onenode(pm, 'descendant::a').text_content().strip()
 
             # Phone number
-            row['Project Manager Phone'] = pm.xpath('text()')[-1].strip()
-            if not re.match(r'\d{3}-\d{3}-\d{4}', row['Project Manager Phone']):
-                msg = 'This is a strange phone number: %s' % row['Project Manager Phone']
+            phone_match = re.match(self.PHONE_NUMBER, pm.text_content())
+            if phone_match:
+                row['Project Manager Phone'] = phone_match.group(1)
+            else:
+                print(row)
+                msg = 'This is a strange phone number: %s' % pm.text_content()
                 RRRaise(AssertionError(msg))
 
             # References
-            row.update(self.references)
-            row['date_scraped'] = self.date_scraped
+            row.update(self.reference)
+            row['datetime_scraped'] = self.datetime_scraped
 
             # Append to our big lists
             data.append(row)
             cwd = 'http://www.mvn.usace.army.mil/ops/regulatory/'
-            publicnotices.append(PublicNotice(url = cwd + row['Public Notice']))
-            drawings.append(Drawing(url = cwd + row['Drawing']))
+            publicnotices.append(PublicNotice(
+                url = cwd + row['Public Notice'],
+                permit = row['PermitApplication No.']
+            ))
+            drawings.append(Drawings(
+                url = cwd + row['Drawings'],
+                permit = row['PermitApplication No.']
+            ))
 
         dt.insert(data, 'ListingData')
         return publicnotices + drawings
 
-class PdfDownload(BucketMold):
-    bucket = 'PdfDownload'
+class PdfDownload(Get):
     motherbucket = 'Listing'
-    bash = "mkdir -p pdf; cd pdf; wget '%(url)s'"
+    bash = "mkdir -p 'pdf/" + self.permit +"'; cd pdf; wget '%(url)s'"
+
+class PublicNotice(PdfDownload):
+    bucket = 'PublicNotice'
+
+    def parse(self, text):
+        raise NotImplementedError('You need to implement the load function for this bucket')
+
+class Drawings(PdfDownload):
+    bucket = 'Drawings'
 
     def parse(self, text):
         raise NotImplementedError('You need to implement the load function for this bucket')
