@@ -149,7 +149,8 @@ curl %(url)s > """ + scraper_run + '.html'
             publicnotices.append(PublicNotice(url = cwd + row['Public Notice'])
             drawings.append(Drawing(url = cwd + row['Drawing']))
 
-        raise NotImplementedError('You need to implement the load function for this bucket')
+        dt.insert(data, 'ListingData')
+        return publicnotices + drawings
 
 class PdfDownload(BucketMold):
     bucket = 'PdfDownload'
@@ -159,6 +160,7 @@ class PdfDownload(BucketMold):
     def parse(self, text):
         raise NotImplementedError('You need to implement the load function for this bucket')
 
+# Store raw downloads in a table
 dt.execute('''
 CREATE TABLE IF NOT EXISTS raw_files (
   scraper_run DATE NOT NULL,
@@ -173,6 +175,7 @@ CREATE TABLE IF NOT EXISTS raw_files (
   UNIQUE(scraper_run, Bucket, url)
 )''')
 
+# Data associated with the listing page
 dt.execute('''
 CREATE TABLE IF NOT EXISTS ListingData (
   scraper_run DATE NOT NULL,
