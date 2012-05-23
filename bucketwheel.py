@@ -1,6 +1,7 @@
 from time import sleep
 import datetime
 from dumptruck import DumpTruck
+import demjson
 
 dt = DumpTruck(
     dbname = 'wetlands.sqlite',
@@ -70,8 +71,9 @@ class BucketMold:
     bucket = 'BucketMold'
     motherbucket = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, motherkwargs = None, **kwargs):
         self.kwargs = kwargs
+        self.motherkwargs = motherkwargs
 
     def load(self):
         raise NotImplementedError('You need to implement the load function for this bucket')
@@ -80,12 +82,17 @@ class BucketMold:
         raise NotImplementedError('You need to implement the parse function for this bucket')
 
     def _go(self):
-        log('Loading a %s' % self.bucket)
-        log(self.kwargs)
+        log('')
+        log('-------------------------------------------')
+        log('')
+        log('Loading this %s:' % self.bucket)
+        log(demjson.encode(self.kwargs, compactly = False))
         blob = self.load()
 
         log('Parsing the bucket')
         childbuckets = self.parse(blob)
+        if childbuckets == None:
+            childbuckets = []
 
         log('Linking to its children')
         # That's what this loop does
@@ -98,13 +105,13 @@ class BucketMold:
         # The first entry has no ancestors, so it has to make its own entry.
         if self.motherbucket == None:
             dt.insert({'scraper_run': scraper_run, 'kwargs': self.kwargs}, self.bucket)
-
         return childbuckets
 
     def reference(self):
         # For linking scraped data to this row
         return {
             'kwargs': self.kwargs,
+            'motherkwargs': self.motherkwargs,
             'scraper_run': scraper_run
         }
 
@@ -139,10 +146,11 @@ def excavate(bucketclasses = [], startingbuckets = []):
         for newbucket in currentbucket._go():
             bag.add(newbucket)
 
+        log("Committing")
         # Commit at the end in case of errors.
         dt.commit()
 
-        # Don't thrash the server
+        log("Taking a break") # Don't thrash the server
         sleep(3)
 
 dt.drop('_dumptruckvars') # Hack to refresh the scraper_run

@@ -30,7 +30,6 @@ class Get(BucketMold):
 #               sleep(WAIT**RETRIES)
 #           else:
 #               break
-        log('Downloading %s' % url)
         raw = requests.get(url).content
         self.datetime_scraped = datetime.datetime.now()
 
@@ -51,6 +50,7 @@ class Get(BucketMold):
     def reference(self):
         # For linking scraped data to this row
         r = BucketMold.reference(self)
+        r['motherkwargs'] = self.motherkwargs
         r['datetime_scraped'] =  self.datetime_scraped
         r['url'] =  self.kwargs['url']
         return r
@@ -79,7 +79,7 @@ def onenode(html, xpath):
 class Listing(Get):
     bucket = 'Listing'
     motherbucket = None
-    bash = "mkdir -p listing; cd listing; curl %(url)s > `date --rfc-3339 date`.html"
+    bash = "mkdir -p listing; cd listing; curl %(url)s > `date --rfc-3339 date`.html > /dev/null 2>&1"
 
     NCOL = 8
     COLNAMES = [
@@ -214,7 +214,6 @@ def pdfto(outformat, cmd, pdfdata):
     cmd +=' "%s" "%s".%s' % (pdfout.name, os.path.splitext(tmpf)[0], outformat)
     cmd += " >/dev/null 2>&1"
     os.system(cmd)
-    print(cmd)
 
     pdfout.close()
     fdata = fin.read()
@@ -227,15 +226,15 @@ pdftoxml = lambda pdf: pdfto('xml',
 
 class PdfDownload(Get):
     motherbucket = 'Listing'
-    bash = "mkdir -p 'pdf/%(permit)s'; cd 'pdf/%(permit)s'; wget '%(url)s'"
+    bash = "mkdir -p 'pdf/%(permit)s'; cd 'pdf/%(permit)s'; wget '%(url)s' >/dev/null 2>&1"
 
     def parse(self, pdf):
         row = self.reference()
-        row['PermitApplication No.'] = kwargs['permit']
+        row['PermitApplication No.'] = self.kwargs['permit']
         row['b64'] = base64.b64encode(pdf)
         row['xml'] = pdftoxml(pdf)
         row['text'] = pdftotext(pdf)
-        dt.insert(row, self.bucket)
+        dt.insert(row, self.bucket + ' Download')
 
 class PublicNotice(PdfDownload):
     bucket = 'Public Notice'
