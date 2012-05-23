@@ -75,6 +75,10 @@ curl %(url)s > """ + scraper_run + '.html'
         'Project Manager'
     )
 
+    @staticmethod
+    def parsedate(rawdate):
+        return datetime.datetime.strptime(rawdate, '%m/%d/%Y').date()
+
     def parse(self, rawtext):
         # There are more data in the comments!
         text_with_locations = rawtext.replace('<!--', '').replace('-->', '').replace('&nbsp;', ' ')
@@ -91,16 +95,30 @@ curl %(url)s > """ + scraper_run + '.html'
         if thead != self.COLNAMES:
             RRRaise(AssertionError('The table header does not have the right names.')
 
-        tbody = [tr.xpath('td') for tr in trs]
-
         # List of dictionaries of data
         data = []
-        for tr in tbody:
-            if len(tr) != self.NCOL:
+        for tr in trs:
+            if len(tr.xpath('td')) != self.NCOL:
                 RRRaise(AssertionError('The table row does not have exactly %d cells.' % self.NCOL)
 
-            row = dict(zip(thead, [td.text_content().strip() for td in tr]))
-            row['Public Notice Date']
+            # As a dict
+            row = dict(zip(thead, [td.text_content().strip() for td in tr.xpath('td')]))
+
+            # Dates
+            row['Public Notice Date'] = self.parsedate(row['Public Notice Date'])
+            row['Expiration Date'] = self.parsedate(row['Expiration Date'])
+
+            # PDF download links
+            pdfkeys = set(tr.cssselect('td/a/text()'))
+            if pdfkeys.issubset({'Public Notice', 'Drawings'}):
+                RRRaise(AssertionError('The has unexpected hyperlinks.')
+            if len(pdfkeys) == 0:
+                RRRaise(AssertionError('No pdf hyperlinks found.')
+
+            for key in ['Public Notice', 'Drawings']:
+                row[key] = onenode(tr, 'td/a[text()="%s"]/@href' % key)
+                if row[key][:4] != 'pdf/':
+                    RRRaise(AssertionError('The %s pdf link doesn\'t have the expected path.' % key))
 
         # Now clean them.
         for row in body:
