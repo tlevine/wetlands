@@ -276,14 +276,39 @@ if __name__ == '__main__':
       [Project Manager Name] TEXT NOT NULL,
       [Project Manager Phone] TEXT NOT NULL,
 
-      FOREIGN KEY(scraper_run, [PermitApplication No.])
-        REFERENCES `Listing`(scraper_run, [PermitApplication No.]),
+      UNIQUE(scraper_run, kwargs),
+      FOREIGN KEY(scraper_run, kwargs)
+        REFERENCES `Listing`(scraper_run, kwargs),
+
       UNIQUE(scraper_run, [PermitApplication No.]),
-      UNIQUE([Public Notice]),
-      UNIQUE(Drawings),
-      UNIQUE([PermitApplication No.])
+      UNIQUE(scraper_run, [Public Notice]),
+      UNIQUE(scraper_run, Drawings),
     )''')
 
+    # Data associated with the listing page
+    pdf_download_schema = '''
+    CREATE TABLE IF NOT EXISTS [PdfDownload] (
+      scraper_run DATE NOT NULL,
+      kwargs JSON NOT NULL,
+      datetime_scraped DATETIME NOT NULL,
+
+      Url TEXT NOT NULL,
+      [PermitApplication No.] TEXT NOT NULL,
+
+      UNIQUE(scraper_run, kwargs),
+      FOREIGN KEY(scraper_run, kwargs)
+        REFERENCES [PdfDownload](scraper_run, kwargs),
+
+      UNIQUE(scraper_run, [PermitApplication No.]),
+      FOREIGN KEY(scraper_run, [PermitApplication No.])
+        REFERENCES `ListingData`(scraper_run, [PermitApplication No.]),
+
+      UNIQUE(scraper_run, Url),
+      FOREIGN KEY(scraper_run, Url)
+        REFERENCES `ListingData`(scraper_run, [PdfDownload]),
+    )''')
+    for bucket in ['Drawings', 'Public Notice']:
+       dt.execute(pdf_download_schema.replace('PdfDownload', bucket)
 
     excavate(
       startingbuckets = [Listing(
