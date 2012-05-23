@@ -3,6 +3,7 @@
 *-journal
 *.pdf
 *.html
+*.bak
 
 # Development
 *.db
