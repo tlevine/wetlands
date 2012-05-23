@@ -1,0 +1,5 @@
+tempdir
+unidecode
+lxml
+dumptruck
+requests

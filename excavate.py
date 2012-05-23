@@ -4,8 +4,10 @@ import os
 import base64
 from dumptruck import DumpTruck
 import requests
+import tempfile
 from unidecode import unidecode
-from lxml.html import fromstring, tostring
+import lxml.html
+import lxml.etree
 from time import sleep
 
 from bucketwheel import * # Sorry
@@ -94,7 +96,7 @@ class Listing(Get):
         # There are more data in the comments!
         text_with_locations = rawtext.replace('<!--', '').replace('-->', '').replace('&nbsp;', ' ')
         unicodetext = unidecode(text_with_locations)
-        html = fromstring(unicodetext)
+        html = lxml.html.fromstring(unicodetext)
         table = onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"]')
         trs = table.xpath('tr')
 
@@ -196,6 +198,28 @@ class Listing(Get):
         dt.insert(data, 'ListingData')
         return publicnotices + drawings
 
+def pdfto(outformat, cmd, pdfdata):
+    'Based on scraperlibs scraperwiki.pdftoxml'
+    pdfout = tempfile.NamedTemporaryFile(suffix='.pdf')
+    pdfout.write(pdfdata)
+    pdfout.flush()
+
+    fin = tempfile.NamedTemporaryFile(mode='r', suffix='.' + outformat)
+    tmpf = fin.name
+    cmd +=' "%s" "%s".%s' % (pdfout.name, os.path.splitext(tmpf)[0], outformat)
+    cmd += " >/dev/null 2>&1"
+    os.system(cmd)
+    print(cmd)
+
+    pdfout.close()
+    fdata = fin.read()
+    fin.close()
+    return fdata
+
+pdftotext = lambda pdf: pdfto('txt', '/usr/bin/pdftotext', pdf)
+pdftoxml = lambda pdf: pdfto('xml',
+    '/usr/bin/pdftohtml -xml -nodrm -zoom 1.5 -enc UTF-8 -noframes', pdf)
+
 class PdfDownload(Get):
     motherbucket = 'Listing'
     bash = "mkdir -p 'pdf/%(permit)s'; cd 'pdf/%(permit)s'; wget '%(url)s'"
@@ -212,53 +236,54 @@ class Drawings(PdfDownload):
     def parse(self, text):
         raise NotImplementedError('You need to implement the load function for this bucket')
 
-# Store raw downloads in a table
-dt.execute('''
-CREATE TABLE IF NOT EXISTS raw_files (
-  scraper_run DATE NOT NULL,
-  Bucket TEXT NOT NULL,
-  kwargs JSON NOT NULL,
-  url TEXT NOT NULL,
+if __name__ == '__main__':
+    # Store raw downloads in a table
+    dt.execute('''
+    CREATE TABLE IF NOT EXISTS raw_files (
+      scraper_run DATE NOT NULL,
+      Bucket TEXT NOT NULL,
+      kwargs JSON NOT NULL,
+      url TEXT NOT NULL,
 
-  datetime_scraped DATETIME NOT NULL,
-  raw BASE64 TEXT NOT NULL,
+      datetime_scraped DATETIME NOT NULL,
+      raw BASE64 TEXT NOT NULL,
 
-  UNIQUE(scraper_run, Bucket, kwargs)
-  UNIQUE(scraper_run, Bucket, url)
-)''')
+      UNIQUE(scraper_run, Bucket, kwargs)
+      UNIQUE(scraper_run, Bucket, url)
+    )''')
 
-# Data associated with the listing page
-dt.execute('''
-CREATE TABLE IF NOT EXISTS ListingData (
-  scraper_run DATE NOT NULL,
-  kwargs JSON NOT NULL,
-  datetime_scraped DATETIME NOT NULL,
-  
-  [Project Description] TEXT NOT NULL,
-  Applicant TEXT NOT NULL,
-  [Public Notice Date] DATETIME NOT NULL,
-  [Expiration Date] DATETIME NOT NULL,
-  [PermitApplication No.] TEXT NOT NULL,
-  [Public Notice] TEXT NOT NULL,
-  [Drawings] TEXT,
-  [Location] TEXT,
-  [Project Manager Email] TEXT NOT NULL,
-  [Project Manager Name] TEXT NOT NULL,
-  [Project Manager Phone] TEXT NOT NULL,
+    # Data associated with the listing page
+    dt.execute('''
+    CREATE TABLE IF NOT EXISTS ListingData (
+      scraper_run DATE NOT NULL,
+      kwargs JSON NOT NULL,
+      datetime_scraped DATETIME NOT NULL,
+      
+      [Project Description] TEXT NOT NULL,
+      Applicant TEXT NOT NULL,
+      [Public Notice Date] DATETIME NOT NULL,
+      [Expiration Date] DATETIME NOT NULL,
+      [PermitApplication No.] TEXT NOT NULL,
+      [Public Notice] TEXT NOT NULL,
+      [Drawings] TEXT,
+      [Location] TEXT,
+      [Project Manager Email] TEXT NOT NULL,
+      [Project Manager Name] TEXT NOT NULL,
+      [Project Manager Phone] TEXT NOT NULL,
 
-  FOREIGN KEY(scraper_run, [PermitApplication No.])
-    REFERENCES `Listing`(scraper_run, [PermitApplication No.]),
-  UNIQUE(scraper_run, [PermitApplication No.]),
-  UNIQUE([Public Notice]),
-  UNIQUE(Drawings),
-  UNIQUE([PermitApplication No.])
-)''')
+      FOREIGN KEY(scraper_run, [PermitApplication No.])
+        REFERENCES `Listing`(scraper_run, [PermitApplication No.]),
+      UNIQUE(scraper_run, [PermitApplication No.]),
+      UNIQUE([Public Notice]),
+      UNIQUE(Drawings),
+      UNIQUE([PermitApplication No.])
+    )''')
 
 
-excavate(
-  startingbuckets = [Listing(
-    url = 'http://www.mvn.usace.army.mil'
-    '/ops/regulatory/publicnotices.asp?ShowLocationOrder=False'
-  )],
-  bucketclasses = [Listing, PublicNotice, Drawings]
-)
+    excavate(
+      startingbuckets = [Listing(
+        url = 'http://www.mvn.usace.army.mil'
+        '/ops/regulatory/publicnotices.asp?ShowLocationOrder=False'
+      )],
+      bucketclasses = [Listing, PublicNotice, Drawings]
+    )
