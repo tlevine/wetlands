@@ -35,7 +35,7 @@ class Get(BucketMold):
         })
 
         # Filesystem save (inefficient but convenient)
-        os.system(self.bash % {'url': url})
+        os.system(self.bash % self.kwargs)
 
         return raw
 
@@ -185,7 +185,7 @@ curl %(url)s > """ + scraper_run + '.html'
 
 class PdfDownload(Get):
     motherbucket = 'Listing'
-    bash = "mkdir -p 'pdf/" + self.permit +"'; cd pdf; wget '%(url)s'"
+    bash = "mkdir -p 'pdf/%(permit)'; cd 'pdf/%(permit)s'; wget '%(url)s'"
 
 class PublicNotice(PdfDownload):
     bucket = 'PublicNotice'
