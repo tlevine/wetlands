@@ -14,30 +14,30 @@ class Bag:
         self.buckets = {Bucket.bucket: Bucket for Bucket in buckets}
 
         # Set up hierarchical relationships
-        for bucket in self.buckets.keys():
-            if self.buckets[bucket].motherbucket == None:
+        for bucketname, bucket in self.buckets.items():
+            if bucket.motherbucket == None:
                 dt.execute('''
-CREATE TABLE IF NOT EXISTS `%(bucket)s` (
-  kwargs JSON TEXT,
-  UNIQUE(kwargs),
-) ''' % {'bucket':bucket.bucket})
+CREATE TABLE IF NOT EXISTS `{bucket}` (
+  kwargs JSON,
+  UNIQUE(kwargs)
+) '''.format(bucket= bucket.bucket))
             else:
                 dt.execute('''
-CREATE TABLE IF NOT EXISTS `%(bucket)s` (
-  kwargs JSON TEXT,
-  motherkwargs JSON TEXT,
+CREATE TABLE IF NOT EXISTS `{bucket}` (
+  kwargs JSON,
+  motherkwargs JSON,
   UNIQUE(kwargs),
-  FOREIGN KEY(motherkwargs) REFERENCES `%(motherbucket)s`(`kwargs`)
-) ''' % {'bucket':bucket.bucket, 'motherbucket': bucket.motherbucket})
+  FOREIGN KEY(motherkwargs) REFERENCES `{motherbucket}`(`kwargs`)
+) '''.format(bucket= bucket.bucket, motherbucket= bucket.motherbucket))
 
         # The bag table
         dt.execute('''
-CREATE TABLE IF NOT EXSTS `%s` (
+CREATE TABLE IF NOT EXISTS `%s` (
   pk INTEGER PRIMARY KEY,
   Bucket TEXT,
   MotherBucket TEXT,
-  kwargs JSON TEXT
- )''')
+  kwargs JSON
+ )''' % self._table_name)
 
     def add(self, element):
         dt.insert({

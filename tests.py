@@ -15,18 +15,15 @@ excavate.dt = DumpTruck(
 
 class DummyBucket:
     bucket = u'DummyBucket'
+    motherbucket = None
     def __init__(self, **kwargs):
         self.kwargs = kwargs
-        self.kwargs.pop('kwargs', None)
-
-    def motherbucket(self):
-        return u'RocketScientistBucket'
 
 class BaseBag(unittest.TestCase):
     def setUp(self):
         excavate.dt.drop('_bag', if_exists = True)
         self.bag = excavate.Bag(buckets = [DummyBucket])
-        self.bucket = DummyBucket(motherbucket = u'RocketScientistBucket')
+        self.bucket = DummyBucket()
 
 class TestBagAdd(BaseBag):
     def test_add(self):
@@ -34,13 +31,13 @@ class TestBagAdd(BaseBag):
         self.bag.add(self.bucket)
         self.bag.add(self.bucket)
         self.bag.add(self.bucket)
-        observed = excavate.dt.dump('_bag')
+        observed = excavate.dt.execute('select Bucket, MotherBucket, kwargs from _bag')
         expected = [{
             u'Bucket': u'DummyBucket',
-            u'MotherBucket': u'RocketScientistBucket',
-            u'kwargs': {u'motherbucket': u'RocketScientistBucket'},
+            u'MotherBucket': None, #u'RocketScientistBucket',
+            u'kwargs': {},
         }] * 4
-        self.assertEqual(observed, expected)
+        self.assertListEqual(observed, expected)
 
 class TestBagAddPop(BaseBag):
     def test_add_pop(self):
