@@ -1,5 +1,6 @@
-from dumptruck import DumpTruck
+from time import sleep
 import datetime
+from dumptruck import DumpTruck
 
 dt = DumpTruck(
     dbname = 'wetlands.sqlite',
@@ -77,19 +78,16 @@ class BucketMold:
 
     def go(self):
         blob = self.load()
-        self.reference = {'scraper_run': scraper_run, 'motherkwargs': self.kwargs} #For linking other data
+
+        #For linking other data
+        self.reference = {'scraper_run': scraper_run, 'motherkwargs': self.kwargs}
         childbuckets = self.parse(blob)
-        ancestry = [{'kwargs': cb.kwargs} for cb in childbuckets]
-
-        # References
-        for kin in ancestry:
+        for cb in childbuckets:
+            kin = {'kwargs': cb.kwargs}
             kin.update(self.reference)
+            dt.insert(kin, cb.bucket)
 
-        dt.insert(ancestry, self.bucket)
-        return morepages
-
-
-
+        return childbuckets
 
 try:
     scraper_run = dt.get_var('scraper_run')
@@ -108,8 +106,9 @@ def excavate(bucketclasses = [], startingbuckets = []):
     bag = Bag(buckets = bucketclasses)
 
     # The seed buckets
-    for b in startingbuckets:
-        bag.add(b)
+    if dt.execute('select count(*) as "c" from `%s`' % bag._table_name)[0]['c'] == 0:
+        for b in startingbuckets:
+            bag.add(b)
 
     # Go
     while True:
@@ -123,5 +122,8 @@ def excavate(bucketclasses = [], startingbuckets = []):
 
         # Commit at the end in case of errors.
         dt.commit()
+
+        # Don't thrash the server
+        sleep(3)
 
 dt.drop('_dumptruckvars') # Hack to refresh the scraper_run

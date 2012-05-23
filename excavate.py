@@ -3,13 +3,15 @@ import re
 import os
 import base64
 from dumptruck import DumpTruck
-from urllib2 import urlopen, URLError
+import requests
 from unidecode import unidecode
 from lxml.html import fromstring, tostring
+from time import sleep
+
 from bucketwheel import * # Sorry
 
-RETRIES = 5
-WAIT = 3 # seconds, raised to the retry
+RETRIES = 4
+WAIT = 2 # seconds, raised to the retry
 
 class Get(BucketMold):
     bucket = 'Get'
@@ -17,12 +19,17 @@ class Get(BucketMold):
     def load(self):
         url = self.kwargs['url']
 
-        # Database save
-        for retry in range(1, 1 + RETRIES):
-            try:
-                raw = urlopen(url, 'rb').read()
-            except URLError:
-                sleep(WAIT**RETRIES)
+#       # Database save
+#       for retry in range(1, 1 + RETRIES):
+#           try:
+#               raw = urlopen(url, 'rb').read()
+#           except URLError:
+#               print('Retrying download of %s' % url)
+#               sleep(WAIT**RETRIES)
+#           else:
+#               break
+        print(url)
+        raw = requests.get(url).content
         self.datetime_scraped = datetime.datetime.now()
 
         dt.insert({
@@ -32,7 +39,7 @@ class Get(BucketMold):
             u'url': url,
             u'datetime_scraped': self.datetime_scraped,
             u'raw': base64.b64encode(raw)
-        })
+        }, 'raw_files')
 
         # Filesystem save (inefficient but convenient)
         os.system(self.bash % self.kwargs)
@@ -63,10 +70,7 @@ def onenode(html, xpath):
 class Listing(Get):
     bucket = 'Listing'
     motherbucket = None
-    bash = """
-mkdir -p listing
-cd listing
-curl %(url)s > """ + scraper_run + '.html'
+    bash = "mkdir -p listing; cd listing; curl %(url)s > `date --rfc-3339 date`.html"
 
     NCOL = 8
     COLNAMES = [
@@ -131,7 +135,14 @@ curl %(url)s > """ + scraper_run + '.html'
                 print row
                 RRRaise(AssertionError('No pdf hyperlinks found for permit %s.' % row['PermitApplication No.']))
             for key in ['Public Notice', 'Drawings']:
-                row[key] = onenode(tr, 'td/descendant::a[text()="%s"]/@href' % key)
+                try:
+                    row[key] = unicode(onenode(tr, 'td/descendant::a[text()="%s"]/@href' % key))
+                except AssertionError:
+                    if key == 'Public Notice':
+                        raise
+                    else:
+                        continue
+
                 if row[key][:4] != 'pdf/':
                     RRRaise(AssertionError('The %s pdf link doesn\'t have the expected path.' % key))
 
@@ -147,7 +158,7 @@ curl %(url)s > """ + scraper_run + '.html'
                 raise
 
             if row['Project Manager Email'][:7] == 'mailto:':
-                row['Project Manager Email'] = row['Project Manager Email'][7:]
+                row['Project Manager Email'] = unicode(row['Project Manager Email'][7:])
             else:
                 msg = 'This is a strange email link: <%s>' % row['Project Manager Email']
                 RRRaise(AssertionError(msg))
@@ -165,8 +176,9 @@ curl %(url)s > """ + scraper_run + '.html'
                 RRRaise(AssertionError(msg))
 
             # References
-            row.update(self.reference)
             row['datetime_scraped'] = self.datetime_scraped
+            row['kwargs'] = self.kwargs
+            row['scraper_run'] = scraper_run
 
             # Append to our big lists
             data.append(row)
@@ -175,17 +187,18 @@ curl %(url)s > """ + scraper_run + '.html'
                 url = cwd + row['Public Notice'],
                 permit = row['PermitApplication No.']
             ))
-            drawings.append(Drawings(
-                url = cwd + row['Drawings'],
-                permit = row['PermitApplication No.']
-            ))
+            if row.has_key('Drawings'):
+                drawings.append(Drawings(
+                    url = cwd + row['Drawings'],
+                    permit = row['PermitApplication No.']
+                ))
 
         dt.insert(data, 'ListingData')
         return publicnotices + drawings
 
 class PdfDownload(Get):
     motherbucket = 'Listing'
-    bash = "mkdir -p 'pdf/%(permit)'; cd 'pdf/%(permit)s'; wget '%(url)s'"
+    bash = "mkdir -p 'pdf/%(permit)s'; cd 'pdf/%(permit)s'; wget '%(url)s'"
 
 class PublicNotice(PdfDownload):
     bucket = 'PublicNotice'
@@ -225,19 +238,20 @@ CREATE TABLE IF NOT EXISTS ListingData (
   Applicant TEXT NOT NULL,
   [Public Notice Date] DATETIME NOT NULL,
   [Expiration Date] DATETIME NOT NULL,
-  [Permit Application No.] TEXT NOT NULL,
+  [PermitApplication No.] TEXT NOT NULL,
   [Public Notice] TEXT NOT NULL,
-  [Drawings] TEXT NOT NULL,
-  Location TEXT NOT NULL,
+  [Drawings] TEXT,
+  [Location] TEXT,
   [Project Manager Email] TEXT NOT NULL,
   [Project Manager Name] TEXT NOT NULL,
   [Project Manager Phone] TEXT NOT NULL,
 
-  FOREIGN KEY(scraper_run, kwargs) REFERENCES `Listing`(scraper_run, kwargs),
-  UNIQUE(scraper_run, kwargs),
+  FOREIGN KEY(scraper_run, [PermitApplication No.])
+    REFERENCES `Listing`(scraper_run, [PermitApplication No.]),
+  UNIQUE(scraper_run, [PermitApplication No.]),
   UNIQUE([Public Notice]),
   UNIQUE(Drawings),
-  UNIQUE([Permit Application No.])
+  UNIQUE([PermitApplication No.])
 )''')
 
 
@@ -246,5 +260,5 @@ excavate(
     url = 'http://www.mvn.usace.army.mil'
     '/ops/regulatory/publicnotices.asp?ShowLocationOrder=False'
   )],
-  bucketclasses = [Listing]
+  bucketclasses = [Listing, PublicNotice, Drawings]
 )
