@@ -21,7 +21,7 @@ class Bag:
 CREATE TABLE IF NOT EXISTS `{bucket}` (
   scraper_run DATE NOT NULL,
   kwargs JSON NOT NULL,
-  UNIQUE(kwargs)
+  UNIQUE(scraper_run, kwargs)
 ) '''.format(bucket= bucket.bucket))
             else:
                 dt.execute('''
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `{bucket}` (
   scraper_run DATE NOT NULL,
   kwargs JSON NOT NULL,
   motherkwargs JSON NOT NULL,
-  UNIQUE(kwargs),
+  UNIQUE(scraper_run, kwargs),
   FOREIGN KEY(motherkwargs) REFERENCES `{motherbucket}`(`kwargs`)
 ) '''.format(bucket= bucket.bucket, motherbucket= bucket.motherbucket))
 

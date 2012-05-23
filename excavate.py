@@ -4,6 +4,7 @@ from bucketwheel import * # Sorry
 class Get(BucketMold):
     bucket = 'Get'
     def load(self):
+        pass
 
 class RegulatoryPage(BucketMold):
     bucket = 'RegulatoryPage'
@@ -17,6 +18,18 @@ class RegulatoryPage(BucketMold):
 class PdfDownload(BucketMold):
     bucket = 'PdfDownload'
 
+
+dt.execute('''
+CREATE TABLE IF NOT EXISTS raw_files (
+  scraper_run DATE NOT NULL,
+  Bucket TEXT NOT NULL,
+  kwargs JSON NOT NULL,
+
+  datetime_scraped DATETIME NOT NULL,
+  raw BLOB NOT NULL,
+
+  UNIQUE(scraper_run, Bucket, kwargs)
+)''')
 excavate(
   startingbuckets = [RegulatoryPage(
     url = 'http://www.mvn.usace.army.mil'
