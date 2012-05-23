@@ -311,7 +311,7 @@ if __name__ == '__main__':
       UNIQUE(scraper_run, url),
       FOREIGN KEY(scraper_run, url)
         REFERENCES `ListingData`(scraper_run, [%(name)s]),
-    )''')
+    )'''
 
     for bucket in ['Drawings', 'Public Notice']:
        dt.execute(pdf_download_schema % {'name': bucket})
