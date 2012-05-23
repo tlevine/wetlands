@@ -35,8 +35,20 @@ class Get(BucketMold):
 
         return raw
 
+QUIET = False
 
-def onenode(html, xpath)
+def RRRaise(exception):
+    if QUIET:
+        dt.insert({
+            'exception': str(type(exception)),
+            'message': str(exception),
+            'datetime': datetime.datetime.now(),
+            'scraper_run': scraper_run
+        }, 'exceptions')
+    else:
+        raise exception
+
+def onenode(html, xpath):
     nodes = html.xpath(xpath)
     if len(nodes) != 1:
         raise ValueError('Not exactly one node')
@@ -52,12 +64,16 @@ mkdir -p listing
 cd listing
 curl %(url)s > """ + scraper_run + '.html'
 
-    def parse(self, text):
-        html = fromstring(text)
+    def parse(self, rawtext):
+        # There are more data in the comments!
+        text_with_locations = rawtext.replace('<!--', '').replace('-->', '')
+
+        html = fromstring(text_with_locations)
         table = onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"')
         trs = table.xpath('tr')
-        header = trs.pop(0)
-        
+
+        header = [td.text_content().strip() for td in trs.pop(0)]
+        if len(header) != 
 
         raise NotImplementedError('You need to implement the load function for this bucket')
 
