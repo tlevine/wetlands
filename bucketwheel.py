@@ -7,6 +7,9 @@ dt = DumpTruck(
     auto_commit = False
 )
 
+def log(text):
+    print(text)
+
 class Bag:
     "A fancier stack, at some point"
     def __init__(self, buckets = [], table_name = '_bag'):
@@ -76,12 +79,17 @@ class BucketMold:
     def parse(self, text):
         raise NotImplementedError('You need to implement the parse function for this bucket')
 
-    def go(self):
+    def _go(self):
+        log('Loading a %s' % self.bucket)
+        log(self.kwargs)
         blob = self.load()
 
-        # For linking to descendant data
-        reference = {'scraper_run': scraper_run, 'motherkwargs': self.kwargs}
+        log('Parsing the bucket')
         childbuckets = self.parse(blob)
+
+        log('Linking to its children')
+        # That's what this loop does
+        reference = {'scraper_run': scraper_run, 'motherkwargs': self.kwargs}
         for cb in childbuckets:
             kin = {'kwargs': cb.kwargs}
             kin.update(reference)
@@ -128,7 +136,7 @@ def excavate(bucketclasses = [], startingbuckets = []):
         if currentbucket == None:
             break
 
-        for newbucket in currentbucket.go():
+        for newbucket in currentbucket._go():
             bag.add(newbucket)
 
         # Commit at the end in case of errors.

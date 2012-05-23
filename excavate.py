@@ -30,7 +30,7 @@ class Get(BucketMold):
 #               sleep(WAIT**RETRIES)
 #           else:
 #               break
-        print(url)
+        log('Downloading %s' % url)
         raw = requests.get(url).content
         self.datetime_scraped = datetime.datetime.now()
 
@@ -50,9 +50,9 @@ class Get(BucketMold):
 
     def reference(self):
         # For linking scraped data to this row
-        r = super(Get).reference(self)
+        r = BucketMold.reference(self)
         r['datetime_scraped'] =  self.datetime_scraped
-        r['url'] =  self.url
+        r['url'] =  self.kwargs['url']
         return r
 
 QUIET = False
@@ -71,7 +71,7 @@ def RRRaise(exception):
 def onenode(html, xpath):
     nodes = html.xpath(xpath)
     if len(nodes) != 1:
-        print(map(tostring, nodes))
+        print(map(lxml.html.tostring, nodes))
         RRRaise(AssertionError('Not exactly one node'))
     else:
         return nodes[0]
@@ -185,7 +185,7 @@ class Listing(Get):
                 RRRaise(AssertionError(msg))
 
             # References
-            row.update(row.reference())
+            row.update(self.reference())
 
             # Append to our big lists
             data.append(row)
@@ -279,13 +279,9 @@ if __name__ == '__main__':
       [Project Manager Name] TEXT NOT NULL,
       [Project Manager Phone] TEXT NOT NULL,
 
-      UNIQUE(scraper_run, kwargs),
-      FOREIGN KEY(scraper_run, kwargs)
-        REFERENCES `Listing`(scraper_run, kwargs),
-
       UNIQUE(scraper_run, [PermitApplication No.]),
       UNIQUE(scraper_run, [Public Notice]),
-      UNIQUE(scraper_run, Drawings),
+      UNIQUE(scraper_run, Drawings)
     )''')
 
     # Data associated with the pdf downloads
@@ -295,6 +291,7 @@ if __name__ == '__main__':
       kwargs JSON NOT NULL,
       datetime_scraped DATETIME NOT NULL,
       url TEXT NOT NULL,
+      [PermitApplication No.] TEXT NOT NULL,
 
       b64 BASE64 TEXT NOT NULL,
       xml TEXT NOT NULL,
@@ -310,7 +307,7 @@ if __name__ == '__main__':
 
       UNIQUE(scraper_run, url),
       FOREIGN KEY(scraper_run, url)
-        REFERENCES `ListingData`(scraper_run, [%(name)s]),
+        REFERENCES `ListingData`(scraper_run, [%(name)s])
     )'''
 
     for bucket in ['Drawings', 'Public Notice']:
