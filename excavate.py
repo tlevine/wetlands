@@ -17,17 +17,17 @@ class Get(BucketMold):
         # Database save
         for retry in range(1, 1 + RETRIES):
             try:
-                raw = urlopen(url).read()
+                raw = urlopen(url, 'rb').read()
             except URLError:
                 sleep(WAIT**RETRIES)
 
         dt.insert({
-            'scraper_run': scraper_run,
-            'Bucket': self.bucket,
-            'kwargs': self.kwargs,
-            'url': url,
-            'datetime_scraped': datetime.datetime.now(),
-            'raw': raw
+            u'scraper_run': scraper_run,
+            u'Bucket': self.bucket,
+            u'kwargs': self.kwargs,
+            u'url': url,
+            u'datetime_scraped': datetime.datetime.now(),
+            u'raw': base64.b64encode(raw)
         })
 
         # Filesystem save (inefficient but convenient)
@@ -55,7 +55,7 @@ def onenode(html, xpath):
     else:
         return nodes[0]
 
-class Listing(GET):
+class Listing(Get):
     bucket = 'Listing'
     motherbucket = None
     bash = """
@@ -82,18 +82,18 @@ curl %(url)s > """ + scraper_run + '.html'
     def parse(self, rawtext):
         # There are more data in the comments!
         text_with_locations = rawtext.replace('<!--', '').replace('-->', '').replace('&nbsp;', ' ')
-
-        html = fromstring(text_with_locations)
+        unicodetext = text_with_locations.decode('utf-8')
+        html = fromstring(unicodetext)
         table = onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"')
         trs = table.xpath('tr')
 
         # Getting the cells 
         thead = [td.text_content().strip() for td in trs.pop(0)]
         if len(thead) != self.NCOL:
-            RRRaise(AssertionError('The table header does not have exactly %d cells.' % self.NCOL)
+            RRRaise(AssertionError('The table header does not have exactly %d cells.' % self.NCOL))
 
         if thead != self.COLNAMES:
-            RRRaise(AssertionError('The table header does not have the right names.')
+            RRRaise(AssertionError('The table header does not have the right names.'))
 
         # List of dictionaries of data
         data = []
@@ -101,7 +101,7 @@ curl %(url)s > """ + scraper_run + '.html'
         drawings = []
         for tr in trs:
             if len(tr.xpath('td')) != self.NCOL:
-                RRRaise(AssertionError('The table row does not have exactly %d cells.' % self.NCOL)
+                RRRaise(AssertionError('The table row does not have exactly %d cells.' % self.NCOL))
 
             # As a dict
             row = dict(zip(thead, [td.text_content().strip() for td in tr.xpath('td')]))
@@ -114,9 +114,9 @@ curl %(url)s > """ + scraper_run + '.html'
             del(row['View or Download'])
             pdfkeys = set(tr.xpath('td[position()=6]/a/text()'))
             if pdfkeys.issubset({'Public Notice', 'Drawings'}):
-                RRRaise(AssertionError('The table row has unexpected hyperlinks.')
+                RRRaise(AssertionError('The table row has unexpected hyperlinks.'))
             if len(pdfkeys) == 0:
-                RRRaise(AssertionError('No pdf hyperlinks found.')
+                RRRaise(AssertionError('No pdf hyperlinks found.'))
             for key in ['Public Notice', 'Drawings']:
                 row[key] = onenode(tr, 'td/a[text()="%s"]/@href' % key)
                 if row[key][:4] != 'pdf/':
@@ -146,7 +146,7 @@ curl %(url)s > """ + scraper_run + '.html'
             # Append to our big lists
             data.append(row)
             cwd = 'http://www.mvn.usace.army.mil/ops/regulatory/'
-            publicnotices.append(PublicNotice(url = cwd + row['Public Notice'])
+            publicnotices.append(PublicNotice(url = cwd + row['Public Notice']))
             drawings.append(Drawing(url = cwd + row['Drawing']))
 
         dt.insert(data, 'ListingData')
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS raw_files (
   url TEXT NOT NULL,
 
   datetime_scraped DATETIME NOT NULL,
-  raw BLOB NOT NULL,
+  raw BASE64 TEXT NOT NULL,
 
   UNIQUE(scraper_run, Bucket, kwargs)
   UNIQUE(scraper_run, Bucket, url)
@@ -203,9 +203,9 @@ CREATE TABLE IF NOT EXISTS ListingData (
 
 
 excavate(
-  startingbuckets = [RegulatoryPage(
+  startingbuckets = [Listing(
     url = 'http://www.mvn.usace.army.mil'
     '/ops/regulatory/publicnotices.asp?ShowLocationOrder=False'
   )],
-  bucketclasses = [RegulatoryPage]
+  bucketclasses = [Listing]
 )
