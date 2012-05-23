@@ -7,7 +7,7 @@ import requests
 import tempfile
 from unidecode import unidecode
 import lxml.html
-import lxml.etree
+#import lxml.etree
 from time import sleep
 
 from bucketwheel import * # Sorry
@@ -47,6 +47,13 @@ class Get(BucketMold):
         os.system(self.bash % self.kwargs)
 
         return raw
+
+    def reference(self):
+        # For linking scraped data to this row
+        r = super(Get).reference(self)
+        r['datetime_scraped'] =  self.datetime_scraped
+        r['url'] =  self.url
+        return r
 
 QUIET = False
 
@@ -178,7 +185,6 @@ class Listing(Get):
                 RRRaise(AssertionError(msg))
 
             # References
-            row['datetime_scraped'] = self.datetime_scraped
             row.update(row.reference())
 
             # Append to our big lists
@@ -223,23 +229,19 @@ class PdfDownload(Get):
     motherbucket = 'Listing'
     bash = "mkdir -p 'pdf/%(permit)s'; cd 'pdf/%(permit)s'; wget '%(url)s'"
 
-    def _parse(self, pdf):
-        b64
-        xml = pdftoxml(pdf)
-        text = pdftotext(pdf)
-        npages = (lxml.etree(xml).xpath('//page'))
+    def parse(self, pdf):
+        row = self.reference()
+        row['PermitApplication No.'] = kwargs['permit']
+        row['b64'] = base64.b64encode(pdf)
+        row['xml'] = pdftoxml(pdf)
+        row['text'] = pdftotext(pdf)
+        dt.insert(row, self.bucket)
 
 class PublicNotice(PdfDownload):
-    bucket = 'PublicNotice'
-
-    def parse(self, text):
-        raise NotImplementedError('You need to implement the parse function for this bucket')
+    bucket = 'Public Notice'
 
 class Drawings(PdfDownload):
     bucket = 'Drawings'
-
-    def parse(self, text):
-        raise NotImplementedError('You need to implement the load function for this bucket')
 
 if __name__ == '__main__':
     # Store raw downloads in a table
@@ -263,6 +265,7 @@ if __name__ == '__main__':
       scraper_run DATE NOT NULL,
       kwargs JSON NOT NULL,
       datetime_scraped DATETIME NOT NULL,
+      url TEXT NOT NULL,
       
       [Project Description] TEXT NOT NULL,
       Applicant TEXT NOT NULL,
@@ -285,30 +288,33 @@ if __name__ == '__main__':
       UNIQUE(scraper_run, Drawings),
     )''')
 
-    # Data associated with the listing page
+    # Data associated with the pdf downloads
     pdf_download_schema = '''
-    CREATE TABLE IF NOT EXISTS [PdfDownload] (
+    CREATE TABLE IF NOT EXISTS [%(name)s Download] (
       scraper_run DATE NOT NULL,
       kwargs JSON NOT NULL,
       datetime_scraped DATETIME NOT NULL,
+      url TEXT NOT NULL,
 
-      Url TEXT NOT NULL,
-      [PermitApplication No.] TEXT NOT NULL,
+      b64 BASE64 TEXT NOT NULL,
+      xml TEXT NOT NULL,
+      text TEXT NOT NULL,
 
       UNIQUE(scraper_run, kwargs),
       FOREIGN KEY(scraper_run, kwargs)
-        REFERENCES [PdfDownload](scraper_run, kwargs),
+        REFERENCES [%(name)s](scraper_run, kwargs),
 
       UNIQUE(scraper_run, [PermitApplication No.]),
       FOREIGN KEY(scraper_run, [PermitApplication No.])
         REFERENCES `ListingData`(scraper_run, [PermitApplication No.]),
 
-      UNIQUE(scraper_run, Url),
-      FOREIGN KEY(scraper_run, Url)
-        REFERENCES `ListingData`(scraper_run, [PdfDownload]),
+      UNIQUE(scraper_run, url),
+      FOREIGN KEY(scraper_run, url)
+        REFERENCES `ListingData`(scraper_run, [%(name)s]),
     )''')
+
     for bucket in ['Drawings', 'Public Notice']:
-       dt.execute(pdf_download_schema.replace('PdfDownload', bucket)
+       dt.execute(pdf_download_schema % {'name': bucket})
 
     excavate(
       startingbuckets = [Listing(
