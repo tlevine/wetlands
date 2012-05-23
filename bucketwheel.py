@@ -74,7 +74,7 @@ class BucketMold:
         raise NotImplementedError('You need to implement the load function for this bucket')
 
     def parse(self, text):
-        raise NotImplementedError('You need to implement the load function for this bucket')
+        raise NotImplementedError('You need to implement the parse function for this bucket')
 
     def go(self):
         blob = self.load()
@@ -89,7 +89,7 @@ class BucketMold:
 
         # The first entry has no ancestors, so it has to make its own entry.
         if self.motherbucket == None:
-            dt.insert({'scraper_run': scraper:run, 'kwargs': kwargs}, self.bucket)
+            dt.insert({'scraper_run': scraper_run, 'kwargs': self.kwargs}, self.bucket)
 
         return childbuckets
 

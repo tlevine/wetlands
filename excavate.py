@@ -204,7 +204,7 @@ class PublicNotice(PdfDownload):
     bucket = 'PublicNotice'
 
     def parse(self, text):
-        raise NotImplementedError('You need to implement the load function for this bucket')
+        raise NotImplementedError('You need to implement the parse function for this bucket')
 
 class Drawings(PdfDownload):
     bucket = 'Drawings'
