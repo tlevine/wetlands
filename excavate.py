@@ -179,8 +179,7 @@ class Listing(Get):
 
             # References
             row['datetime_scraped'] = self.datetime_scraped
-            row['kwargs'] = self.kwargs
-            row['scraper_run'] = scraper_run
+            row.update(row.reference())
 
             # Append to our big lists
             data.append(row)
@@ -223,6 +222,12 @@ pdftoxml = lambda pdf: pdfto('xml',
 class PdfDownload(Get):
     motherbucket = 'Listing'
     bash = "mkdir -p 'pdf/%(permit)s'; cd 'pdf/%(permit)s'; wget '%(url)s'"
+
+    def _parse(self, pdf):
+        b64
+        xml = pdftoxml(pdf)
+        text = pdftotext(pdf)
+        npages = (lxml.etree(xml).xpath('//page'))
 
 class PublicNotice(PdfDownload):
     bucket = 'PublicNotice'

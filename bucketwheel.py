@@ -80,11 +80,11 @@ class BucketMold:
         blob = self.load()
 
         # For linking to descendant data
-        self.reference = {'scraper_run': scraper_run, 'motherkwargs': self.kwargs}
+        reference = {'scraper_run': scraper_run, 'motherkwargs': self.kwargs}
         childbuckets = self.parse(blob)
         for cb in childbuckets:
             kin = {'kwargs': cb.kwargs}
-            kin.update(self.reference)
+            kin.update(reference)
             dt.insert(kin, cb.bucket)
 
         # The first entry has no ancestors, so it has to make its own entry.
@@ -92,6 +92,13 @@ class BucketMold:
             dt.insert({'scraper_run': scraper_run, 'kwargs': self.kwargs}, self.bucket)
 
         return childbuckets
+
+    def reference(self):
+        # For linking scraped data to this row
+        return {
+            'kwargs': self.kwargs,
+            'scraper_run': scraper_run
+        }
 
 try:
     scraper_run = dt.get_var('scraper_run')
