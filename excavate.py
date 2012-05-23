@@ -3,6 +3,8 @@ from dumptruck import DumpTruck
 from urllib2 import urlopen, URLError
 from bucketwheel import * # Sorry
 
+from lxml.html import fromstring
+
 RETRIES = 5
 WAIT = 3 # seconds, raised to the retry
 
@@ -33,7 +35,16 @@ class Get(BucketMold):
 
         return raw
 
+
+def onenode(html, xpath)
+    nodes = html.xpath(xpath)
+    if len(nodes) != 1:
+        raise ValueError('Not exactly one node')
+    else:
+        return nodes[0]
+
 class Listing(GET):
+
     bucket = 'Listing'
     motherbucket = None
     bash = """
@@ -42,6 +53,9 @@ cd listing
 curl %(url)s > """ + scraper_run + '.html'
 
     def parse(self, text):
+        html = fromstring(text)
+        table = onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"')
+
         raise NotImplementedError('You need to implement the load function for this bucket')
 
 class PdfDownload(BucketMold):
