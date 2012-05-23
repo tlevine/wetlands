@@ -8,16 +8,38 @@ import os
 
 import excavate
 # Hack for faster runnig
-excavate.dt = DumpTruck(
-    dbname = '/tmp/wetlands.sqlite',
-    auto_commit = False
-)
+def refreshdb():
+    os.system('rm /tmp/wetlands.sqlite')
+    excavate.dt = DumpTruck(
+        dbname = '/tmp/wetlands.sqlite',
+        auto_commit = False
+    )
+refreshdb()
 
 class DummyBucket:
     bucket = u'DummyBucket'
     motherbucket = None
     def __init__(self, **kwargs):
         self.kwargs = kwargs
+
+class Grandpa(excavate.BucketMold):
+    bucket = 'Grandpa'
+
+class Pa(excavate.BucketMold):
+    bucket = 'Pa'
+    motherbucket = 'Grandpa'
+
+class Bro(excavate.BucketMold):
+    bucket = 'Bro'
+    motherbucket = 'Pa'
+
+class FamilyBag(unittest.TestCase):
+    def setUp(self):
+        refreshdb()
+        self.bag = excavate.Bag(buckets = [Grandpa, Pa, Bro])
+
+    def test_tables_count(self):
+        self.assertSetEqual(excavate.dt.tables(), {'Grandpa', 'Pa', 'Bro', '_bag'})
 
 class BaseBag(unittest.TestCase):
     def setUp(self):
