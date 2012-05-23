@@ -1,6 +1,12 @@
 Army Corps 404 Website Scraper
 =======
 
+TODO
+
+* Add pictures to the readme.
+* Tell Scott about the readme.
+* Document the schema, installing, running, &c.
+
 Prospectus
 -------------
 There are many, many permits issued to fill and/or dredge wetlands in the New Orleans District, perhaps the most vulnerable district to wetland destruction in the United States.  And many project reviewers.  There may be 30 standard permits a week, and few advocates, whose time is overcommitted.  There are probably more general permits issued—these are never publicly noticed.  It takes a watchdog a minimum of 4 hours to review the 404 website for possible targets for comment, and 8 hours average for each comment.  Each FOIA takes an hour minimum.  Phone calls with regulators take 15 minutes to half an hour, usually. 
@@ -43,8 +49,9 @@ the `raw_files` table in the database and in proper database tables.
 
 ### Filesystem
 
-Raw data are stored in the directories `listing` and `pdf`. Here is
-their structure.
+Raw data are stored in the directories `listing` and `pdf`.
+`listing` is for [this web page](http://www.mvn.usace.army.mil/ops/regulatory/publicnotices.asp?ShowLocationOrder=False),
+and `pdf` is for the pdf files. Here is the structure of these directories.
 
     ./
       listing/
@@ -63,23 +70,51 @@ their structure.
             1189.pdf
             sec10PN_1189.pdf
 
+### raw_files database table
+
+The filesystem structure is convenient to access, but managing versions
+of the files is a little easier in a database. The `raw_files` table
+is similarly simple to a table; here is the schema.
+
+    CREATE TABLE IF NOT EXISTS raw_files (
+      scraper_run DATE NOT NULL,
+      Bucket TEXT NOT NULL,
+      kwargs JSON NOT NULL,
+      url TEXT NOT NULL,
+
+      datetime_scraped DATETIME NOT NULL,
+      raw BASE64 TEXT NOT NULL,
+
+      UNIQUE(scraper_run, Bucket, kwargs)
+      UNIQUE(scraper_run, Bucket, url)
+    )
+
+`kwargs` is the paramaters to the document retrieval and parse function;
+is used as a main identifier to link different scraped documents.
+The field `url` is provided for convenience, but note that it does not
+necessarily uniquely identify a document.
+`scraper_run` is the day on which the script was started, but
+`datetime_scraped` includes the time when the particular document was
+downloaded. The document is stored base64-encoded in `raw`.
+
+
+### Proper database tables
+
 Scraped data stored across various tables which are set up to allow
 for easy maintanance, searching and analysis of links among data,
 time-based searches, scraped data and metadata.
 
-The raw files are stored in these same tables
-
-
-
-They are then parsed and linked together inside of the database.
+The raw files are stored in these same tables in addition to the
+`raw_files` table. They are also parsed and linked together.
 
     Explain the schema here.
 
 The data will quickly become too big for git, so they are not versioned
 in git; we need to come up with some other way of handling backups.
 
-directories `listing` (for the web page) and `pdf` for the pdf files
+Architecture
+---------
 
-The program architecture uses a simple message queue running
+The program uses a simple message queue (`bucketwheel.py`) running
 on top of SQLite. The queue makes writing the scraper convenient,
 but it is not threadsafe, just so you know.
