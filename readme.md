@@ -125,8 +125,8 @@ involves a few hacks.
 
 Loading and parsing of each particular document is handled
 
-But *do not run two instances of this in the same environment*;
-that may mess up the data.
+And **do not run two instances of this in the same environment**;
+that will mess up the queue.
 
 
 ### Size
