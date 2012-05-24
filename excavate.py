@@ -254,7 +254,7 @@ if __name__ == '__main__':
     if new_run and prev_run == scraper_run:
         print("I already finished running today, so I'm stopping now.")
  
-   else:
+    else:
         if new_run:
             print('Starting a new run! The last run was on %s' % prev_run)
         else:
@@ -272,7 +272,7 @@ if __name__ == '__main__':
           raw BASE64 TEXT NOT NULL,
  
           UNIQUE(scraper_run, Bucket, kwargs)
-          UNIQUE(scraper_run, Bucket, url)
+          UNIQUE(scraper_run, url)
         )''')
  
         # Data associated with the listing page
