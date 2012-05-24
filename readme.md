@@ -86,13 +86,12 @@ is similarly simple to a table; here is the schema.
       raw BASE64 TEXT NOT NULL,
 
       UNIQUE(scraper_run, Bucket, kwargs)
-      UNIQUE(scraper_run, Bucket, url)
+      UNIQUE(scraper_run, url)
     )
 
 `kwargs` is the paramaters to the document retrieval and parse function;
 is used as a main identifier to link different scraped documents.
-The field `url` is provided for convenience, but note that it does not
-necessarily uniquely identify a document.
+The field `url` also works as an identifier.
 `scraper_run` is the day on which the script was started, but
 `datetime_scraped` includes the time when the particular document was
 downloaded. The document is stored base64-encoded in `raw`.
