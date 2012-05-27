@@ -96,6 +96,9 @@ The field `url` also works as an identifier.
 `datetime_scraped` includes the time when the particular document was
 downloaded. The document is stored base64-encoded in `raw`.
 
+I didn't need to use kwargs thing because this site's HTTP requests
+are all ordinary GET requests, but it'll help when we want to do more
+processing offline later because it'll let me use the same queue.
 
 ### Proper database tables
 
