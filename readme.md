@@ -113,7 +113,7 @@ The raw files are stored in these same tables in addition to the
 
 The data will quickly become too big for git, so they are not versioned
 in git; we need to come up with some other way of handling backups
-and distribution (probably bittorrent).
+and distribution (probably rsync and bittorrent).
 
 Architecture
 ---------
