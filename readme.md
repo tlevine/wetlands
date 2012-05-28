@@ -118,8 +118,9 @@ and distribution (probably rsync and bittorrent).
 Architecture
 ---------
 
-The program uses a simple message queue (`bucketwheel.py`) running
-on top of SQLite. The queue makes writing the scraper convenient,
+The program uses a simple message queue (actually more like a mosh pit)
+called Bucket Wheel that runs atop
+SQLite. The queue makes writing the scraper convenient,
 but it is not threadsafe, just so you know.
 
 Tables are mapped to Python classes, one class for each type of document.
