@@ -2,7 +2,33 @@
 .mode csv
 .header on
 
-select * from
+SELECT
+  -- I changed the order slightly. This order is better.
+
+  -- Identifiers
+  [Public Notice].scraper_run,
+  [Public Notice Download].[PermitApplication No.],
+
+  -- Meat
+  ListingData.[Project Description],
+  Applicant,
+  [Location],
+
+  [Public Notice Date],
+  [Expiration Date],
+
+  [Project Manager Name],
+  [Project Manager Email],
+  [Project Manager Phone],
+
+  -- References
+  [Public Notice],
+  [Drawings],
+
+  -- Further extracts
+  [Public Notice Download].text AS pdf_text
+
+FROM
   [Public Notice]
   -- Add rows
   JOIN Listing ON
