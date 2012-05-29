@@ -6,8 +6,8 @@ SELECT
   -- I changed the order slightly. This order is better.
 
   -- Identifiers
-  [Public Notice].scraper_run,
   [Public Notice Download].[PermitApplication No.],
+  [Public Notice].scraper_run,
 
   -- Meat
   ListingData.[Project Description],
@@ -42,5 +42,7 @@ FROM
   JOIN ListingData ON
     [Public Notice Download].scraper_run = ListingData.scraper_run AND
     [Public Notice Download].[PermitApplication No.]=ListingData.[PermitApplication No.]
---Listing.scraper_run = ListingData.scraper_run AND Listing.kwargs=ListingData.kwargs
-limit 1;
+ORDER BY
+  [Public Notice Download].[PermitApplication No.],
+  [Public Notice].scraper_run
+limit 10;
