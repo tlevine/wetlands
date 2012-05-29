@@ -45,4 +45,4 @@ FROM
 ORDER BY
   [Public Notice Download].[PermitApplication No.],
   [Public Notice].scraper_run
-limit 10;
+;
