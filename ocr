@@ -1,0 +1,17 @@
+#!/bin/sh
+# Based on http://superuser.com/questions/28426/how-to-extract-text-with-ocr-from-a-pdf-on-linux
+
+infile="$1"
+tmpfile=`basename "$infile"`
+tmpdir="$(mktemp -d)"
+
+# Extract tiffs
+gs -SDEVICE=tiffg4 -r400x400 -sOutputFile="$tmpdir/$tmpfile-%03d.tiff" -dNOPAUSE -dBATCH -- $infile
+
+for tiff in $tmpdir/$tmpfile-*.tiff; do
+  base=`basename "$tiff" .tiff`
+  cuneiform -f hocr -o "$base.html" "$tiff"
+done
+cat $tmpdir/$tmpfile-*.tiff > $infile.html
+
+#rm -rf -- "$tmpdir"
