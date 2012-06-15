@@ -296,8 +296,8 @@ if __name__ == '__main__':
           [Project Manager Phone] TEXT NOT NULL,
  
           UNIQUE(scraper_run, [PermitApplication No.]),
-          UNIQUE(scraper_run, [Public Notice]),
-          UNIQUE(scraper_run, Drawings)
+--        UNIQUE(scraper_run, [Public Notice]),
+--        UNIQUE(scraper_run, Drawings)
         )''')
  
         # Data associated with the pdf downloads
