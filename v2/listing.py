@@ -118,7 +118,7 @@ def listing_parse(rawtext):
 def listing_save(data, db):
     doc_new = {
         '_id': data['projectDescription'],
-        'scriptRuns': [DATETIME],
+        'scriptRuns': [],
 
         'location': data['location'],
         'projectDescription': data['projectDescription'],
@@ -129,12 +129,10 @@ def listing_save(data, db):
 
         'publicNotice': {
             'url': data['publicNoticeUrl'],
-            'processed': False,
             'data': {},
         },
         'drawings': {
             'url': data['drawingsUrl'],
-            'processed': False,
             'data': {},
         },
 
@@ -148,7 +146,7 @@ def listing_save(data, db):
     # If the permitApplicationNumber doesn't exist
     db.permit.update({"_id": doc_new['_id']}, doc_new, upsert = True) 
 
-    # If it does
+    # Now that it does.
     db.permit.update(
         {"_id": doc_new['_id']},
         {"$push": {"scriptRuns": DATETIME}
