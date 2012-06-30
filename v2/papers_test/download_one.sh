@@ -10,7 +10,7 @@ runtests() {
   permit=MVN-a93409234
   date=2012-06-01
   paper
-    --type public_notice \
+    --papertype public_notice \
     --url localhost:5678/thuho.pdf \
     --permit $permit \
     --date $date
