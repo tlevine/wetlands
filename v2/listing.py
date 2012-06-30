@@ -9,6 +9,9 @@ DATETIME = datetime.datetime.now()
 #connection = pymongo.Connection('desk')
 #db = connection.wetlands
 
+def _log(foo):
+    pass
+
 def listing_retrieve(
         url = 'http://www.mvn.usace.army.mil/ops/regulatory/publicnotices.asp?ShowLocationOrder=False',
         stamp = datetime.datetime.now().isoformat()
@@ -28,13 +31,13 @@ def listing_parse(rawtext):
     # Getting the cells 
     thead = [td.text_content().strip() for td in trs.pop(0)]
     if len(thead) != _NCOL:
-        print(thead)
+        _log(thead)
         _RRRaise(AssertionError('The table header does not have exactly %d cells.' % _NCOL))
 
     if thead != _COLNAMES:
         pairs = zip(thead, _COLNAMES)
         for a, b in pairs:
-            print(a, b), 'Match' if a == b else 'Differ'
+            _log(a, b), 'Match' if a == b else 'Differ'
         _RRRaise(AssertionError('The table header does not have the right names.'))
 
     # List of dictionaries of data
@@ -56,7 +59,7 @@ def listing_parse(rawtext):
         del(row['View or Download'])
         pdfkeys = set(tr.xpath('td[position()=6]/descendant::a/text()'))
         if not pdfkeys.issubset({'Public Notice', 'Drawings'}):
-            print(pdfkeys)
+            _log(pdfkeys)
             _RRRaise(AssertionError('The table row has unexpected hyperlinks.'))
         if len(pdfkeys) == 0:
             print row
@@ -81,7 +84,7 @@ def listing_parse(rawtext):
         try:
             row['Project Manager Email'] = _onenode(pm, 'descendant::a/@href')
         except AssertionError:
-            print(row)
+            _log(row)
             raise
 
         if row['Project Manager Email'][:7] == 'mailto:':
@@ -98,7 +101,7 @@ def listing_parse(rawtext):
         if phone_match:
             row['Project Manager Phone'] = phone_match.group(1)
         else:
-            print(row)
+            _log(row)
             msg = 'This is a strange phone number: %s' % pm.text_content()
             _RRRaise(AssertionError(msg))
 
@@ -197,7 +200,7 @@ def _RRRaise(exception):
 def _onenode(html, xpath):
     nodes = html.xpath(xpath)
     if len(nodes) != 1:
-        print(map(lxml.html.tostring, nodes))
+        _log(map(lxml.html.tostring, nodes))
         _RRRaise(AssertionError('Not exactly one node'))
     else:
         return nodes[0]
