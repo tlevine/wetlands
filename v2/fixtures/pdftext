@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -e
+
+FILEBASE="`basename \"$1\" .pdf`"
+
+# Extract images
+pdfimages -j "$FILEBASE.pdf" "$FILEBASE"
+
+# Extract text
+pdftotext $FILEBASE.pdf > $FILEBASE.txt
+
+# OCR
+for file in "$FILEBASE"-*.jpg
+  do
+  tesseract $file $file
+  echo "$file.txt" >> "$FILEBASE.txt"
+done
