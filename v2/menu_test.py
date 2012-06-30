@@ -24,6 +24,24 @@ class TestMenuParse(unittest.TestCase):
         "The data should be of appropriate types."
         raise NotImplementedError('')
 
+    def test_keys(self):
+        "The data should have the appropriate keys."
+        observed = set(self.observedData.keys())
+        expected = {
+            'scriptRuns', # List of datetimes when run
+            'projectDescription',
+            'applicant',
+            'publicNoticeDate',
+            'expirationDate',
+            'permitApplicationNumber',
+            'publicNoticeUrl',
+            'drawingsUrl',
+            'projectManagerEmail',
+            'projectManagerName',
+            'projectManagerPhone',
+        }
+        self.assertSetEqual(observed, expected)
+
     def test_data(self):
         "The observed data should equal the expected data."
         self.assertEqual
