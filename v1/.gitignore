@@ -1,0 +1,11 @@
+# Data
+listing
+pdf
+*.sqlite
+*-journal
+*.pdf
+*.html
+*.bak
+
+# Development
+*.db

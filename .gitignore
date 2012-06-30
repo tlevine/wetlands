@@ -1,14 +1,3 @@
-# Data
-listing
-pdf
-*.sqlite
-*-journal
-*.pdf
-*.html
-*.bak
-
-# Development
-*.db
 *.py[c]
 *.sw[op]
 .~lock*
