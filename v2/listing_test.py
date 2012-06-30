@@ -59,9 +59,9 @@ class TestMenuParse(unittest.TestCase):
         }
         self.assertSetEqual(observed, expected)
 
-    def test_data(self):
-        "The observed data should equal the expected data."
-        self.assertEqual
+#   def test_data(self):
+#       "The observed data should equal the expected data."
+#       self.assertListEqual(self.observedData, self.expectedData)
 
 #class TestMenuSave(unittest.TestCase):
 #    def setUp(self):

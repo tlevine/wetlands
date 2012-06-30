@@ -5,7 +5,7 @@ import re
 from unidecode import unidecode
 from urllib2 import urlopen
 
-DAY = datetime.date.today()
+DATETIME = datetime.datetime.now()
 #connection = pymongo.Connection('desk')
 #db = connection.wetlands
 
@@ -155,16 +155,35 @@ KEYMAP = [
   ('Project Manager Phone','projectManagerPhone'),
 ]
 
-
-'scriptRuns'
-
-
-
-
-
 def listing_save(data, db):
-    data['_id'] = data['permitId']
-    db.permits.save(data)
+    doc_new = {
+        'scriptRuns': [DATETIME],
+
+        'location': data['location']
+        'projectDescription': data['projectDescription'],
+        'applicant': data['applicant'],
+        'publicNoticeDate': data['publicNoticeDate'],
+        'expirationDate': data['expirationDate'],
+        'permitApplicationNumber': data['permitApplicationNumber'],
+
+        'publicNotice': {
+            'url': data['publicNoticeUrl']
+        },
+        'drawings': {
+            'url': data['drawingsUrl']
+        },
+        'projectManager': {
+            'email': data['projectManagerEmail'],
+            'name': data['projectManagerName'],
+            'phone': data['projectManagerPhone'],
+        },
+    }
+
+    # If the permitApplicationNumber doesn't exist,
+    # db.permits.save(doc_new)
+
+    # If it does,
+    # db.permits. append the current DATETIME to scriptRuns
 
 def _onenode(html, xpath):
     nodes = html.xpath(xpath)
