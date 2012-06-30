@@ -9,9 +9,11 @@ DATETIME = datetime.datetime.now()
 #connection = pymongo.Connection('desk')
 #db = connection.wetlands
 
-def listing_retrieve(url = 'http://www.mvn.usace.army.mil/ops/regulatory/publicnotices.asp?ShowLocationOrder=False', stamp = datetime.datetime.now().isoformat()):
-    "Change the url for testing.")
-    rawtext = urlopen().read()
+def listing_retrieve(
+        url = 'http://www.mvn.usace.army.mil/ops/regulatory/publicnotices.asp?ShowLocationOrder=False',
+        stamp = datetime.datetime.now().isoformat()
+    ):
+    rawtext = urlopen(url).read()
     open('listings/%s.html' % stamp, 'w').write(rawtext)
     return rawtext
 

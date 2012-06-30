@@ -2,7 +2,7 @@ import os
 import unittest
 import datetime
 import json
-from listing import listing_parse, listing_save
+from listing import listing_retrieve, listing_parse, listing_save
 
 class TestMenuParse(unittest.TestCase):
     def setUp(self):
