@@ -1,5 +1,11 @@
 #!/bin/sh
 
-python2 listings_test.py
+set -e
+
+curl http://localhost:5678 > /dev/null ||
+  ( echo You need to serve fixtures on port 5678 &&
+  exit 1 )
+
+python2 listing_test.py
 ~/Documents/urchin/urchin -s papers_test
 ~/Documents/urchin/urchin -c ./pdftext_test.sh
