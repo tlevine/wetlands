@@ -117,6 +117,7 @@ def listing_parse(rawtext):
 
 def listing_save(data, db):
     doc_new = {
+        '_id': data['projectDescription'],
         'scriptRuns': [DATETIME],
 
         'location': data['location'],
@@ -144,13 +145,22 @@ def listing_save(data, db):
         },
     }
 
-    # If the permitApplicationNumber doesn't exist,
-    # db.permits.save(doc_new)
+    # If the permitApplicationNumber doesn't exist
+    db.permit.update({"_id": doc_new['_id']}, doc_new, upsert = True) 
 
-    # If it does,
-    # db.permits.
-    #   append the current DATETIME to scriptRuns
-    #   set drawings.processed to false 
+    # If it does
+    db.permit.update(
+        {"_id": doc_new['_id']},
+        {"$push": {"scriptRuns": DATETIME}
+    )
+    db.permit.update(
+        {"_id": doc_new['_id']},
+        {"$set": {"publicNotice.processed": False }
+    )
+    db.permit.update(
+        {"_id": doc_new['_id']},
+        {"$set": {"drawings.processed": False }
+    )
 
 _KEYMAP = [
     ('Project Description','projectDescription'),
