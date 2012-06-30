@@ -6,7 +6,7 @@ from unidecode import unidecode
 from urllib2 import urlopen
 
 DATETIME = datetime.datetime.now()
-#connection = pymongo.Connection('desk')
+#connection = pymongo.Connection('localhost')
 #db = connection.wetlands
 
 def listing_retrieve(
@@ -116,49 +116,52 @@ def listing_parse(rawtext):
     return data2
 
 def listing_save(data, db):
-    doc_new = {
-        '_id': data['projectDescription'],
+    data_new = [{
+        '_id': doc['permitApplicationNumber'],
         'scriptRuns': [],
-
-        'location': data['location'],
-        'projectDescription': data['projectDescription'],
-        'applicant': data['applicant'],
-        'publicNoticeDate': data['publicNoticeDate'],
-        'expirationDate': data['expirationDate'],
-        'permitApplicationNumber': data['permitApplicationNumber'],
-
+ 
+        'location': doc['location'],
+        'projectDescription': doc['projectDescription'],
+        'applicant': doc['applicant'],
+        'publicNoticeDate': doc['publicNoticeDate'],
+        'expirationDate': doc['expirationDate'],
+        'permitApplicationNumber': doc['permitApplicationNumber'],
+ 
         'publicNotice': {
-            'url': data['publicNoticeUrl'],
+            'url': doc['publicNoticeUrl'],
             'data': {},
         },
         'drawings': {
-            'url': data['drawingsUrl'],
+            'url': doc['drawingsUrl'],
             'data': {},
         },
-
+ 
         'projectManager': {
-            'email': data['projectManagerEmail'],
-            'name': data['projectManagerName'],
-            'phone': data['projectManagerPhone'],
+            'email': doc['projectManagerEmail'],
+            'name': doc['projectManagerName'],
+            'phone': doc['projectManagerPhone'],
         },
-    }
+    } for doc in data]
+    del(data)
+    del(doc)
 
-    # If the permitApplicationNumber doesn't exist
-    db.permit.update({"_id": doc_new['_id']}, doc_new, upsert = True) 
-
-    # Now that it does
-    db.permit.update(
-        {"_id": doc_new['_id']},
-        {"$push": {"scriptRuns": DATETIME}
-    )
-    db.permit.update(
-        {"_id": doc_new['_id']},
-        {"$set": {"publicNotice.processed": False }
-    )
-    db.permit.update(
-        {"_id": doc_new['_id']},
-        {"$set": {"drawings.processed": False }
-    )
+    for doc_new in data_new:
+        # If the permitApplicationNumber doesn't exist
+        db.permit.update({"_id": doc_new['_id']}, doc_new, upsert = True) 
+ 
+        # Now that it does
+        db.permit.update(
+            {"_id": doc_new['_id']},
+            {"$push": {"scriptRuns": DATETIME}}
+        )
+        db.permit.update(
+            {"_id": doc_new['_id']},
+            {"$set": {"publicNotice.processed": False }}
+        )
+        db.permit.update(
+            {"_id": doc_new['_id']},
+            {"$set": {"drawings.processed": False }}
+        )
 
 _KEYMAP = [
     ('Project Description','projectDescription'),
@@ -187,7 +190,7 @@ _COLNAMES = [
 ]
 
 def _parsedate(rawdate):
-    return datetime.datetime.strptime(rawdate, '%m/%d/%Y').date()
+    return datetime.datetime.strptime(rawdate, '%m/%d/%Y')
 
 QUIET = True
 
