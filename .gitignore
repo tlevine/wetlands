@@ -11,3 +11,4 @@ pdf
 *.db
 *.py[c]
 *.sw[op]
+.~lock*
