@@ -3,15 +3,16 @@
 . ./papers.sh
 
 runtests() {
-  permit=MVN-a93409234
+  permit=MVN-foo-bar-baz
   paper \
     --papertype public_notice \
-    --url localhost:5678/thuho.pdf \
+    --url http://localhost:5678/Kilbride\ PN.pdf \
     --permit $permit \
     --date 2012-05-28
+
   paper \
     --papertype public_notice \
-    --url localhost:5678/thuho.pdf \
+    --url http://localhost:5678/Kilbride\ PN.pdf \
     --permit $permit \
     --date 2012-06-01
 
