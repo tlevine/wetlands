@@ -46,16 +46,19 @@ class TestMenuParse(unittest.TestCase):
         "The observed data should equal the expected data."
         self.assertEqual
 
-class TestMenuSave(unittest.TestCase):
-    def setUp(self):
-        "Load expected JSON."
-        menuData = open(os.path.join('fixtures', 'menu.json'))
-        self.data = json.loads(menuData.read())
-        menuData.close()
+#class TestMenuSave(unittest.TestCase):
+#    def setUp(self):
+#        "Load expected JSON."
+#        menuData = open(os.path.join('fixtures', 'menu.json'))
+#        self.data = json.loads(menuData.read())
+#        menuData.close()
 
-        self.connection = pymongo.Connection('desk')
-        self.db = self.connection.wetlands_test
+#        self.connection = pymongo.Connection('desk')
+#        self.db = self.connection.wetlands_test
 
-    def test_save(self):
-        menu_save(self.data, self.db)
-        self.db.find
+#    def test_save(self):
+#        menu_save(self.data, self.db)
+#        self.db.find
+
+if __name__ == "__main__":
+    unittest.main()
