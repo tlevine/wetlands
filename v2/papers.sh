@@ -10,8 +10,14 @@ paper() {
   url=localhost:5678/Kilbride\ PN.pdf
 
   dir="pdfs/$permit"
-  file="pdfs/$permit/$papertype-$date.pdf"
-  link="pdfs/$permit/$papertype.pdf"
+  file="$dir/$papertype-$date.pdf"
+  link="$dir/$papertype.pdf"
+
+  # Don't download the same file twice in a row.
+  if [ -e "$file" ]
+    then
+    return
+  fi
 
   mkdir -p "$dir"
   wget -O "$file" "$url"
@@ -20,7 +26,15 @@ paper() {
     md5sum "$papertype-$date.pdf" > "$papertype-$date.pdf.md5"
   )
 
-  if [ -h $link ] && [ "`cut -d \  -f 1 $file.md5`" = "`cut -d \  -f 1 $link.md5`" ]
+  md5a="`cut -d \  -f 1 $file.md5`"
+
+  if [ -h $link ]
+    then
+    linkmd5="`readlink $link.md5`"
+    md5b="`cut -d \  -f 1 $linkmd5`"
+  fi
+
+  if [ -h $link ] && [ "$md5a" = "$md5b" ]
     then
     # If this is the same as the previous file,
 

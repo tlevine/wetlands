@@ -17,6 +17,6 @@ runtests() {
   assert 'Something md5sum has been created' [ -e pdfs/$permit/public_notice-$date.pdf.md5 ]
   cd pdfs/$permit
   assert 'md5sum matches' md5sum --status --check public_notice-$date.pdf.md5
-  cd -
+  cd - > /dev/null
   assert 'The appropriate short link has been created' [ "pdfs/$permit/public_notice-$date.pdf" = "`readlink pdfs/$permit/public_notice.pdf`" ]
 }
