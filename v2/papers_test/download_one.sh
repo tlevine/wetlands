@@ -3,12 +3,12 @@
 # The server.example directory must be served at localhost:5678
 # The pdf directory must be empty.
 
-. papers.sh
+. ./papers.sh
 
 runtests() {
   permit=MVN-foo-bar-baz
   date=2012-04-01
-  paper
+  paper \
     --papertype public_notice \
     --url localhost:5678/Kilbride\ PN.pdf \
     --permit $permit \
