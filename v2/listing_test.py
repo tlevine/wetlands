@@ -63,6 +63,17 @@ class TestMenuParse(unittest.TestCase):
 #       "The observed data should equal the expected data."
 #       self.assertListEqual(self.observedData, self.expectedData)
 
+class TestMenuRetrieve(unittest.TestCase):
+    def setUp(self):
+        self.observedHtml = listing_retrieve(url="http://localhost:5678/listing.html", stamp='test')
+        self.expectedHtml = open('fixtures/listing.html').read()
+
+    def test_output(self):
+        self.assertEqual(self.observedHtml, self.expectedHtml)
+
+    def test_file(self):
+        self.assertEqual(open('listings/test.html').read(), self.expectedHtml)
+
 #class TestMenuSave(unittest.TestCase):
 #    def setUp(self):
 #        "Load expected JSON."
