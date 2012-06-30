@@ -1,6 +1,6 @@
 import os
 import unittest
-from schema import menu_parse, menu_save
+from menu import menu_parse, menu_save
 import json
 
 class TestMenuParse(unittest.TestCase):
