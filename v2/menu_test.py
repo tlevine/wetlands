@@ -17,8 +17,8 @@ class TestMenuParse(unittest.TestCase):
         menuData.close()
 
     def test_length(self):
-        "The table should have 30 items."
-        self.assertEqual(len(self.data), 30)
+        "The table should have 44 items."
+        self.assertEqual(len(self.observedData), 44)
 
     def test_types(self):
         "The data should be of appropriate types."
@@ -26,7 +26,7 @@ class TestMenuParse(unittest.TestCase):
 
     def test_keys(self):
         "The data should have the appropriate keys."
-        observed = set(self.observedData.keys())
+        observed = set(self.observedData[0].keys())
         expected = {
             'scriptRuns', # List of datetimes when run
             'projectDescription',
