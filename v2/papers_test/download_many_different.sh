@@ -2,6 +2,10 @@
 
 . ./papers.sh
 
+setup() {
+  rm -Rf pdfs/MVN-foo-bar-baz
+}
+
 runtests() {
   permit=MVN-foo-bar-baz
   paper \
@@ -12,7 +16,7 @@ runtests() {
 
   paper \
     --papertype public_notice \
-    --url http://localhost:5678/Kilbride\ PN.pdf \
+    --url http://localhost:5678/listing.html \
     --permit $permit \
     --date 2012-06-01
 
