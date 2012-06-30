@@ -2,6 +2,10 @@
 
 . ./papers.sh
 
+setup() {
+  rm -Rf pdfs/MVN-foo-bar-baz
+}
+
 runtests() {
   permit=MVN-foo-bar-baz
   paper \
