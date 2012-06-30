@@ -7,8 +7,9 @@ FILE="$1"
 # Extract images
 pdfimages -j "$FILE" "$FILE"
 
-# Extract text
-pdftotext "$FILE" > "$FILE".txt
+# Extract text to `echo $FILE|sed s/pdf$/txt/`
+pdftotext "$FILE"
+mv "`echo \"$FILE\"|sed s/pdf$/txt/`" "$FILE.txt"
 
 # OCR
 for file in "$FILE"-[0-9][0-9][0-9].jpg
