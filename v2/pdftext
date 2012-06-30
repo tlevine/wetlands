@@ -2,17 +2,17 @@
 
 set -e
 
-FILEBASE="`basename \"$1\" .pdf`"
+FILE="$1"
 
 # Extract images
-pdfimages -j "$FILEBASE.pdf" "$FILEBASE"
+pdfimages -j "$FILE" "$FILE"
 
 # Extract text
-pdftotext $FILEBASE.pdf > $FILEBASE.txt
+pdftotext "$FILE" > "$FILE".txt
 
 # OCR
-for file in "$FILEBASE"-*.jpg
+for file in "$FILE"-[0-9][0-9][0-9].jpg
   do
-  tesseract $file $file
-  echo "$file.txt" >> "$FILEBASE.txt"
+  tesseract "$file" "$file"
+  echo "$file.txt" >> "$FILE.txt"
 done
