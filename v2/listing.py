@@ -188,13 +188,14 @@ def _log(foo):
         print foo
 
 def _RRRaise(exception):
+    raise exception
     if QUIET:
-        dt.insert({
+        print {
             'exception': str(type(exception)),
             'message': str(exception),
             'datetime': datetime.datetime.now(),
             'scraper_run': scraper_run
-        }, 'exceptions')
+        }
     else:
         raise exception
 
