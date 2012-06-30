@@ -74,6 +74,9 @@ class TestMenuRetrieve(unittest.TestCase):
     def test_file(self):
         self.assertEqual(open('listings/test.html').read(), self.expectedHtml)
 
+    def tearDown(self):
+        os.remove('listings/test.html')
+
 #class TestMenuSave(unittest.TestCase):
 #    def setUp(self):
 #        "Load expected JSON."
