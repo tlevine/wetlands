@@ -1,12 +1,10 @@
 #!/bin/sh
 
-. pdftext.sh
-
 file=fixtures/Kilbride\ PN.pdf
 
 setup () {
   rm -f "$file.txt"
-  pdftext "$file"
+  ./pdftext "$file"
 }
 
 runtests() {

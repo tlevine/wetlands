@@ -1,0 +1,5 @@
+#!/bin/sh
+
+python2 listings_test.py
+~/Documents/urchin/urchin -s papers_test
+~/Documents/urchin/urchin -c ./pdftext_test.sh
