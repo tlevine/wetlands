@@ -9,35 +9,6 @@ DATETIME = datetime.datetime.now()
 #connection = pymongo.Connection('desk')
 #db = connection.wetlands
 
-_PHONE_NUMBER = re.compile(r'[^0-9]*(\d{3}-\d{3}-\d{4})[^0-9]*')
-_NCOL = 8
-_COLNAMES = [
-    'Project Description',
-    'Applicant',
-    'Public Notice Date',
-    'Expiration Date',
-    'PermitApplication No.',
-    'View or Download',
-    'Location',
-    'Project Manager'
-]
-
-def _parsedate(rawdate):
-    return datetime.datetime.strptime(rawdate, '%m/%d/%Y').date()
-
-QUIET = False
-def _RRRaise(exception):
-    if QUIET:
-        dt.insert({
-            'exception': str(type(exception)),
-            'message': str(exception),
-            'datetime': datetime.datetime.now(),
-            'scraper_run': scraper_run
-        }, 'exceptions')
-    else:
-        raise exception
-
-
 def listing_retrieve():
     rawtext = urlopen('http://www.mvn.usace.army.mil/ops/regulatory/publicnotices.asp?ShowLocationOrder=False').read()
     open('listings/' + datetime.datetime.now().isoformat(), 'w').write(rawtext)
@@ -133,7 +104,7 @@ def listing_parse(rawtext):
 
     data2 = []
     for row in data:
-        row2 = {new: row.get(old, None) for old, new in KEYMAP}
+        row2 = {new: row.get(old, None) for old, new in _KEYMAP}
         for k, v in row2.items():
             if type(v) in {lxml.etree._ElementStringResult, str}:
                 row2[k] = unicode(v)
@@ -141,25 +112,11 @@ def listing_parse(rawtext):
 
     return data2
 
-KEYMAP = [
-  ('Project Description','projectDescription'),
-  ('Applicant','applicant'),
-  ('PermitApplication No.','permitApplicationNumber'),
-  ('Public Notice Date','publicNoticeDate'),
-  ('Public Notice','publicNoticeUrl'),
-  ('Location','location'),
-  ('Drawings','drawingsUrl'),
-  ('Expiration Date','expirationDate'),
-  ('Project Manager Email', 'projectManagerEmail'),
-  ('Project Manager Name','projectManagerName'),
-  ('Project Manager Phone','projectManagerPhone'),
-]
-
 def listing_save(data, db):
     doc_new = {
         'scriptRuns': [DATETIME],
 
-        'location': data['location']
+        'location': data['location'],
         'projectDescription': data['projectDescription'],
         'applicant': data['applicant'],
         'publicNoticeDate': data['publicNoticeDate'],
@@ -167,11 +124,16 @@ def listing_save(data, db):
         'permitApplicationNumber': data['permitApplicationNumber'],
 
         'publicNotice': {
-            'url': data['publicNoticeUrl']
+            'url': data['publicNoticeUrl'],
+            'processed': False,
+            'data': {},
         },
         'drawings': {
-            'url': data['drawingsUrl']
+            'url': data['drawingsUrl'],
+            'processed': False,
+            'data': {},
         },
+
         'projectManager': {
             'email': data['projectManagerEmail'],
             'name': data['projectManagerName'],
@@ -183,7 +145,51 @@ def listing_save(data, db):
     # db.permits.save(doc_new)
 
     # If it does,
-    # db.permits. append the current DATETIME to scriptRuns
+    # db.permits.
+    #   append the current DATETIME to scriptRuns
+    #   set drawings.processed to false 
+
+_KEYMAP = [
+    ('Project Description','projectDescription'),
+    ('Applicant','applicant'),
+    ('PermitApplication No.','permitApplicationNumber'),
+    ('Public Notice Date','publicNoticeDate'),
+    ('Public Notice','publicNoticeUrl'),
+    ('Location','location'),
+    ('Drawings','drawingsUrl'),
+    ('Expiration Date','expirationDate'),
+    ('Project Manager Email', 'projectManagerEmail'),
+    ('Project Manager Name','projectManagerName'),
+    ('Project Manager Phone','projectManagerPhone'),
+]
+_PHONE_NUMBER = re.compile(r'[^0-9]*(\d{3}-\d{3}-\d{4})[^0-9]*')
+_NCOL = 8
+_COLNAMES = [
+    'Project Description',
+    'Applicant',
+    'Public Notice Date',
+    'Expiration Date',
+    'PermitApplication No.',
+    'View or Download',
+    'Location',
+    'Project Manager'
+]
+
+def _parsedate(rawdate):
+    return datetime.datetime.strptime(rawdate, '%m/%d/%Y').date()
+
+QUIET = False
+def _RRRaise(exception):
+    if QUIET:
+        dt.insert({
+            'exception': str(type(exception)),
+            'message': str(exception),
+            'datetime': datetime.datetime.now(),
+            'scraper_run': scraper_run
+        }, 'exceptions')
+    else:
+        raise exception
+
 
 def _onenode(html, xpath):
     nodes = html.xpath(xpath)
