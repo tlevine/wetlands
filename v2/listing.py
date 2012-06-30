@@ -1,8 +1,9 @@
 import pymongo
 import datetime
-import lxml.html
+import lxml.html, lxml.etree
 import re
 from unidecode import unidecode
+from urllib2 import urlopen
 
 DAY = datetime.date.today()
 #connection = pymongo.Connection('desk')
@@ -37,10 +38,12 @@ def _RRRaise(exception):
         raise exception
 
 
-def menu_retrieve():
+def listing_retrieve():
+    rawtext = urlopen('http://www.mvn.usace.army.mil/ops/regulatory/publicnotices.asp?ShowLocationOrder=False').read()
+    open('listings/' + datetime.datetime.now().isoformat(), 'w').write(rawtext)
     return rawtext
 
-def menu_parse(rawtext):
+def listing_parse(rawtext):
     # There are more data in the comments!
     text_with_locations = rawtext.replace('<!--', '').replace('-->', '').replace('&nbsp;', ' ')
     unicodetext = unidecode(text_with_locations)
@@ -86,7 +89,7 @@ def menu_parse(rawtext):
             _RRRaise(AssertionError('No pdf hyperlinks found for permit %s.' % row['PermitApplication No.']))
         for key in ['Public Notice', 'Drawings']:
             try:
-                row[key] = unicode(_onenode(tr, 'td/descendant::a[text()="%s"]/@href' % key))
+                row[key] = _onenode(tr, 'td/descendant::a[text()="%s"]/@href' % key)
             except AssertionError:
                 if key == 'Public Notice':
                     raise
@@ -128,12 +131,15 @@ def menu_parse(rawtext):
         # Append to our big lists
         data.append(row)
 
-    data_newkeys = []
+    data2 = []
     for row in data:
-        row_newkeys = {new: row.get(old, None) for old, new in KEYMAP}
-        data_newkeys.append(row_newkeys)
+        row2 = {new: row.get(old, None) for old, new in KEYMAP}
+        for k, v in row2.items():
+            if type(v) in {lxml.etree._ElementStringResult, str}:
+                row2[k] = unicode(v)
+        data2.append(row2)
 
-    return data_newkeys
+    return data2
 
 KEYMAP = [
   ('Project Description','projectDescription'),
@@ -156,7 +162,7 @@ KEYMAP = [
 
 
 
-def menu_save(data, db):
+def listing_save(data, db):
     data['_id'] = data['permitId']
     db.permits.save(data)
 
