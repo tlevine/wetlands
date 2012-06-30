@@ -1,0 +1,29 @@
+I separate the process into these steps. These steps are run each day.
+
+\begin{enumerate}
+\item Menu
+  \begin{enumerate}
+  \item Retrieve the menu
+  \item Parse the menu
+  \item Save the menu
+  \end{enumerate}
+\item Download pdfs (Do this for both public notices and paper documents.)
+  \begin{enumerate}
+  \item Download the notice
+  \item Check the md5sum
+  \item If we haven't seen this file before, save it to the filesystem.
+  \item Save metadata to the database
+  \end{enumerate}
+\item Search pdfs
+  \item Run optical character recognition on new pdfs, and save results to the filesystem.
+  \item Try to extract the information of interest from new pdfs.
+  \item Save the information of interest to the database.
+\item Send alerts
+  \begin{enumerate}
+  \item Query the database for disturbing notices.
+  \item Email the appropriate people.
+  \end{enumerate}
+\item Display things pretty-like on a website.
+\end{enumerate}
+
+Metadata are stored inside a mongodb, and files are stored on a filesystem.
