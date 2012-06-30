@@ -9,9 +9,6 @@ DATETIME = datetime.datetime.now()
 #connection = pymongo.Connection('desk')
 #db = connection.wetlands
 
-def _log(foo):
-    pass
-
 def listing_retrieve(
         url = 'http://www.mvn.usace.army.mil/ops/regulatory/publicnotices.asp?ShowLocationOrder=False',
         stamp = datetime.datetime.now().isoformat()
@@ -184,7 +181,12 @@ _COLNAMES = [
 def _parsedate(rawdate):
     return datetime.datetime.strptime(rawdate, '%m/%d/%Y').date()
 
-QUIET = False
+QUIET = True
+
+def _log(foo):
+    if QUIET == False:
+        print foo
+
 def _RRRaise(exception):
     if QUIET:
         dt.insert({
