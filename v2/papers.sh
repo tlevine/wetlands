@@ -2,10 +2,10 @@
 
 papers() {
   # Parametrize this.
-  permit=MVN-a93409234
-  date=2012-06-01
+  permit=MVN-foo-bar-baz
+  date=2012-04-01
   papertype=public_notice
-  url=localhost:5678/thuho.pdf
+  url=localhost:5678/Kilbride\ PN.pdf \
   file="pdfs/$permit/$papertype-$date.pdf"
   link="pdfs/$permit/$papertype.pdf"
 
