@@ -1,10 +1,12 @@
 import pymongo
 import datetime
 import lxml.html
+import re
+from unidecode import unidecode
 
 DAY = datetime.date.today()
-connection = pymongo.Connection('desk')
-db = connection.wetlands
+#connection = pymongo.Connection('desk')
+#db = connection.wetlands
 
 _PHONE_NUMBER = re.compile(r'[^0-9]*(\d{3}-\d{3}-\d{4})[^0-9]*')
 _NCOL = 8
@@ -43,7 +45,7 @@ def menu_parse(rawtext):
     text_with_locations = rawtext.replace('<!--', '').replace('-->', '').replace('&nbsp;', ' ')
     unicodetext = unidecode(text_with_locations)
     html = lxml.html.fromstring(unicodetext)
-    table = onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"]')
+    table = _onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"]')
     trs = table.xpath('tr')
 
     # Getting the cells 
@@ -84,7 +86,7 @@ def menu_parse(rawtext):
             RRRaise(AssertionError('No pdf hyperlinks found for permit %s.' % row['PermitApplication No.']))
         for key in ['Public Notice', 'Drawings']:
             try:
-                row[key] = unicode(onenode(tr, 'td/descendant::a[text()="%s"]/@href' % key))
+                row[key] = unicode(_onenode(tr, 'td/descendant::a[text()="%s"]/@href' % key))
             except AssertionError:
                 if key == 'Public Notice':
                     raise
@@ -96,11 +98,11 @@ def menu_parse(rawtext):
 
         # Project manager contact information
         del(row['Project Manager'])
-        pm = onenode(tr, 'td[position()=8]')
+        pm = _onenode(tr, 'td[position()=8]')
 
         # Email address
         try:
-            row['Project Manager Email'] = onenode(pm, 'descendant::a/@href')
+            row['Project Manager Email'] = _onenode(pm, 'descendant::a/@href')
         except AssertionError:
             print(row)
             raise
@@ -112,7 +114,7 @@ def menu_parse(rawtext):
             RRRaise(AssertionError(msg))
 
         # Name 
-        row['Project Manager Name'] = onenode(pm, 'descendant::a').text_content().strip()
+        row['Project Manager Name'] = _onenode(pm, 'descendant::a').text_content().strip()
 
         # Phone number
         phone_match = re.match(self.PHONE_NUMBER, pm.text_content())

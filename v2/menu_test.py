@@ -1,7 +1,7 @@
 import os
 import unittest
-from menu import menu_parse, menu_save
 import json
+from menu import menu_parse, menu_save
 
 class TestMenuParse(unittest.TestCase):
     def setUp(self):
