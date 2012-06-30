@@ -1,6 +1,6 @@
 #!/bin/sh
 
-file=pdf.example/aoseutaoeu/aoeuoaeu.pdf
+file=fixtures/Kilbride\ PN.pdf
 
 setup () {
   rm -f "$file.txt"
