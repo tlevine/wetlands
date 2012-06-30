@@ -4,7 +4,7 @@ import datetime
 import json
 from listing import listing_retrieve, listing_parse, listing_save
 
-class TestMenuParse(unittest.TestCase):
+class TestListingParse(unittest.TestCase):
     def setUp(self):
         "Load HTML and expected JSON and parse the HTML."
         listing = open(os.path.join('fixtures', 'listing.html'))
@@ -63,7 +63,7 @@ class TestMenuParse(unittest.TestCase):
 #       "The observed data should equal the expected data."
 #       self.assertListEqual(self.observedData, self.expectedData)
 
-class TestMenuRetrieve(unittest.TestCase):
+class TestListingRetrieve(unittest.TestCase):
     def setUp(self):
         self.observedHtml = listing_retrieve(url="http://localhost:5678/listing.html", stamp='test')
         self.expectedHtml = open('fixtures/listing.html').read()
@@ -77,7 +77,7 @@ class TestMenuRetrieve(unittest.TestCase):
     def tearDown(self):
         os.remove('listings/test.html')
 
-#class TestMenuSave(unittest.TestCase):
+#class TestListingSave(unittest.TestCase):
 #    def setUp(self):
 #        "Load expected JSON."
 #        listingData = open(os.path.join('fixtures', 'listing.json'))
