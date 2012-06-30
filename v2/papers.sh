@@ -3,11 +3,21 @@
 paper() {
   set -e
 
-  # Parametrize this.
-  permit=MVN-foo-bar-baz
-  date=2012-04-01
-  papertype=public_notice
-  url=localhost:5678/Kilbride\ PN.pdf
+  USAGE="usage: $0 --permit [permit number] --url [url] --papertype [public_notice or drawings] --date [like 2012-04-01]"
+
+  while [ $# -gt 0 ]
+  do
+      case "$1" in
+          --papertype) papertype="$2" && shift;;
+          --url) url="$2" && shift;;
+          --permit) permit="$2" && shift;;
+          --date) date="$2" && shift;;
+          -*) echo >&2 $USAGE
+              exit 1;;
+          *)  break;;
+      esac
+      shift
+  done
 
   dir="pdfs/$permit"
   file="$dir/$papertype-$date.pdf"
