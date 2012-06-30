@@ -1,0 +1,5 @@
+# Don't version pdfs
+*.pdf
+
+# Version the md5sums?
+*.md5
