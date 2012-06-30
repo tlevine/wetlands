@@ -18,5 +18,4 @@ runtests() {
   assert 'Something md5sum has been created' [ -e pdfs/$permit/public_notice-$date.pdf.md5 ]
   assert 'md5sum matches' false
   assert 'The appropriate short link has been created' false
-  assert 'paper errors when type is not public_notice or drawing' false
 }
