@@ -14,7 +14,39 @@ import unittest
 from read import read_public_notice, \
     _read_coords, _convert_coords, \
     _read_wqc_number, \
-    _read_cup_number
+    _read_cup_number, \
+    _read_acres
+
+class TestAcres(unittest.TestCase):
+    def setUp(self):
+        self.rawtext = '''
+3): Lat 29° 12' 09.91"N / Long -89° 38' 36.53"W; Borrow Area 9 (Pt. 9):
+Lat 29° 12' 52.5"N / Long -89° 36' 49.7"W; Section 39-41, T20S-R28E; Section 16-21 ,26-28,34,35,1 3, 24, T218-
+R28E; West of Empire Waten/vay within Bastian Bay area.
+DESCRIPTION: Shell Island East Restoration Berm Enhancement Project and Shell Island West NRDA Restoration Project (BA-
+110/11 1) forthe proposed creation of +/- 615 acres of beach/dune habitat and +/-343 acres of brackish marsh
+habitat along the Barataria Basin Barrier Shoreline. Project includes the dredging of +/-12.9 M c.y. of sediment from
+potential borrow areas MR-A, MR-B, MR-E, 35E, and 9 (MR-B and MR-E previously permitted under P20101416 -
+Scofield Island Restoration Project/ BA-40). Conveyance of sediment within a submerged/buried 30" pipeline
+proposed from borrow sources MR-A, MR-B, and MR-E along an existing dredge pipeline corridor follows the
+Empire Waterway (previously permitted under P20101416) and from Areas 35E and 9 with estimated losses in
+sediment due to transfer anticipated. Proposed till required for the creation of dune habitat is +/- 6.4M c.y. and +/-
+1.8M c.y. for the creation of marsh habitat. Project also includes the excavation of +/- 467,900 c.y. for access
+channels and subsequent placement on both sides to a height conducive to marsh establishment, excavation of +/-
+865,000 c.y. for the construction of the primary dikes for containment of marsh creation areas, the placement 250
+c.y. of gravel for dredge pipeline levee crossings, and the excavation of +/- 21,400 c.y. for navigational crossings,
+booster pump locations, Empire Harbor Canal crossing, Highway 11 and 23 crossings, and the Empire Marsh
+crossing. "Approximately 2,291 ac. of non-vegetated waterbottom, 1.2 ac. of non-wet, and 132 ac. of vegetated
+wetland habitat may be impacted as a result of proposed activity.**
+Approximately 1,832 acres of Essential Fish Habitat (EFH) utilized by various life stages of red drum and panaeid
+shrimp would be altered or destroyed by this project. This information is provided to initiate federal consultation
+requirements pertaining to EF H under the Magnuson-Stevens Fishery Conservation and Management Act.*
+NOTICE the Louisiana Department of Natural Resources, Office of Coastal Management (OCM) has
+received the above application for a Coastal Use Permit (CUP) in accordance with the State and Local
+Coastal Resources Management Act of 1978, as amended, (Louisiana R.S. 49:2'''
+    def test_go(self):
+        self.assertListEqual(_read_acres(self.rawtext), [615., 343., 1832.])
+
 
 class TestCUP(unittest.TestCase):
     def setUp(self):

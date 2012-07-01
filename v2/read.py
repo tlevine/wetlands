@@ -7,6 +7,12 @@ def read_public_notice(rawtext):
 def strip_ws(rawtext):
     return ''.join(rawtext.split())
 
+ACRES = re.compile(r'([0-9,.]+)acre')
+def _read_acres(rawtext):
+    raw = re.findall(ACRES, strip_ws(rawtext))
+    return [float(a.replace(',', '')) for a in raw]
+
+
 CUP_NUMBER = re.compile(r'\s(P\d{8})[^0-9]')
 def _read_cup_number(rawtext):
     return set(re.findall(CUP_NUMBER, rawtext))
