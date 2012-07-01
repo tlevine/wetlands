@@ -9,7 +9,7 @@ Handling null values:
 
 import os
 import unittest
-from read import read_public_notice
+from read import read_public_notice, _read_coords, _convert_coords
 
 class TestIndividualFeatures(unittest.TestCase):
     def setUp(self):
@@ -43,13 +43,8 @@ R28E; West of Empire Waten/vay within Bastian Bay area.
         observed = _read_coords(self.rawtext, decimal = True)
         expected = [
             # Latitude, longitude
-            ( ( 29, 16, 38.24 ) , ( -89, -37, -43.91 ) ),
-            ( ( 29, 17, 49.45 ) , ( -89, -39, -51.73 ) ),
-            ( ( 29, 26, 57.94 ) , ( -89, -36, -11.43 ) ),
-            ( ( 29, 22, 52.80 ) , ( -89, -34, -36.95 ) ),
-            ( ( 29, 21, 04.95 ) , ( -89, -30, -07.18 ) ),
-            ( ( 29, 12, 09.91 ) , ( -89, -38, -36.53 ) ),
-            ( ( 29, 12, 52.5  ) , ( -89, -36, -49.7  ) ),
+            ( 29.12345,  -89.1234 ),
+            # &c.
         ]
         self.assertListEqual(observed, expected)
 
