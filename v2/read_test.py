@@ -48,6 +48,20 @@ R28E; West of Empire Waten/vay within Bastian Bay area.
         ]
         self.assertListEqual(observed, expected)
 
+class TestConvertCoords(unittest.TestCase):
+    def test_positive(self):
+        observed = round(read._convert_coords(29, 16, 38.24 ), 8)
+        self.assertEqual(observed, 29.27728888)
+
+    def test_negative(self):
+        observed = round(read._convert_coords(-89, -37, -43.91 ), 8)
+        self.assertEqual(observed, 89.62886388)
+
+    def test_different_signs(self):
+        "Sending parameters of different signs raises a ValueError."
+        with self.assertRaises(ValueError):
+            read._convert_coords(-89, 37, 43.91 )
+
 class TestReadPublicNotice(unittest.TestCase):
     def setUp(self):
         rawtext = open('fixtures/Kilasoethuasoet.pdf.txt').read()
