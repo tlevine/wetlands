@@ -56,8 +56,14 @@ class TestReadTerms(unittest.TestCase):
            --> optionally, if "road" found, remark that.
 """
     def test_1(self):
-        o = _read_terms('mitigation Bank')
-        e = {'mitigationbank': True, 'drill': False, 'road': False}
+        o = _read_terms('mitigation Bank section 404')
+        e = {
+            'mitigationbank': True,
+            'drill': False,
+            'road': False,
+            'section10': False,
+            'section404': True,
+        }
         self.assertDictEqual(o, e)
 
 class TestCUP(unittest.TestCase):
