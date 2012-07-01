@@ -12,10 +12,16 @@ def _read_acres(rawtext):
     raw = re.findall(ACRES, strip_ws(rawtext))
     return [float(a.replace(',', '')) for a in raw]
 
+TERMS = [
+    "mitigationbank",
+    "drill",
+    "road",
+    "section10",
+    "section404"
+]
 def _read_terms(rawtext):
     rawtext = strip_ws(rawtext).lower()
-    terms = ["mitigationbank", "drill", "road"]
-    return {term: term in rawtext for term in terms}
+    return {term: term in rawtext for term in TERMS}
 
 #           --> optionally, list numbers for "cubic yards"  or "material".  this is more difficult.  These will be numbers estimating the volumes of material dredged or filled.
 
