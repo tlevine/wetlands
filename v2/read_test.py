@@ -78,7 +78,7 @@ class TestConvertCoords(unittest.TestCase):
 
 class TestReadPublicNotice(unittest.TestCase):
     def setUp(self):
-        rawtext = open('fixtures/Kilasoethuasoet.pdf.txt').read()
+        rawtext = open('fixtures/Kilbride PN.pdf.txt').read()
         self.data = read_public_notice(rawtext)
     def test_keys(self):
         observed = set(self.data.keys())
