@@ -7,6 +7,10 @@ def read_public_notice(rawtext):
 def strip_ws(rawtext):
     return ''.join(rawtext.split())
 
+CUP_NUMBER = re.compile(r'\s(P\d{8})[^0-9]')
+def _read_cup_number(rawtext):
+    return set(re.findall(CUP_NUMBER, rawtext))
+
 WQC_NUMBER = re.compile(r'WQCApplicationNumber[^0-9]*([0-9-]+)')
 def _read_wqc_number(rawtext):
     rawtext = strip_ws(rawtext)
