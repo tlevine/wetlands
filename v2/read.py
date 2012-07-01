@@ -4,12 +4,23 @@ import re
 def read_public_notice(rawtext):
     "Get everything from the notice."
 
-_COORDS = re.compile(r'(-?\d+)°(\d+)\'([0-9.]+)"([NW])')
-def _read_coords(rawtext, decimal = True, verbose = False):
-    "Get coordinates from the notice."
-    rawcoords = re.findall(_COORDS, ''.join(rawtext.split()))
-    cleancoords = []
+MINUTE_COORDS = re.compile(r'(-?\d+)°(\d+)\'([0-9.]+)"([NW])')
+DECIMAL_COORDS = re.compile(r'(lat|latitude|long|longitude)[0-9.]+',
+    flags = re.IGNORECASE)
 
+def _read_coords(rawtext, **kwargs):
+    "Get coordinates from the notice."
+    rawtext = ''.join(rawtext.split())
+
+    rawcoords = re.findall(MINUTE_COORDS, rawtext)
+    if len(rawcoords) > 0:
+        return _clean_minute_coords(rawcoords, **kwargs)
+
+    rawcoordsd = re.findall(DECIMAL_COORDS, rawtext)
+    return _clean_decimal_coords(rawcoordsd)
+
+def _clean_minute_coords(rawcoords, decimal = True, verbose = False):
+    cleancoords = []
     while len(rawcoords) > 0:
         first = rawcoords.pop(0)
         second = rawcoords.pop(0)
