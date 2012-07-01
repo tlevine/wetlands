@@ -15,7 +15,8 @@ from read import read_public_notice, \
     _read_coords, _convert_coords, \
     _read_wqc_number, \
     _read_cup_number, \
-    _read_acres
+    _read_acres, \
+    _read_terms
 
 class TestAcres(unittest.TestCase):
     def setUp(self):
@@ -47,6 +48,17 @@ Coastal Resources Management Act of 1978, as amended, (Louisiana R.S. 49:2'''
     def test_go(self):
         self.assertListEqual(_read_acres(self.rawtext), [615., 343., 1832.])
 
+class TestReadTerms(unittest.TestCase):
+    """
+		At least for normal, non-JPN permits
+--> optionally, if "mitigation bank" found, remark that. 
+           --> optionally, if "drill" found, remark that.
+           --> optionally, if "road" found, remark that.
+"""
+    def test_1(self):
+        o = _read_terms('mitigation Bank')
+        e = {'mitigationbank': True, 'drill': False, 'road': False}
+        self.assertDictEqual(o, e)
 
 class TestCUP(unittest.TestCase):
     def setUp(self):

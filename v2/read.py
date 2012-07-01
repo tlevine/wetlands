@@ -12,6 +12,12 @@ def _read_acres(rawtext):
     raw = re.findall(ACRES, strip_ws(rawtext))
     return [float(a.replace(',', '')) for a in raw]
 
+def _read_terms(rawtext):
+    rawtext = strip_ws(rawtext).lower()
+    terms = ["mitigationbank", "drill", "road"]
+    return {term: term in rawtext for term in terms}
+
+#           --> optionally, list numbers for "cubic yards"  or "material".  this is more difficult.  These will be numbers estimating the volumes of material dredged or filled.
 
 CUP_NUMBER = re.compile(r'\s(P\d{8})[^0-9]')
 def _read_cup_number(rawtext):
