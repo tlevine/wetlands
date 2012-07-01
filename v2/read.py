@@ -4,13 +4,33 @@ import re
 def read_public_notice(rawtext):
     "Get everything from the notice."
 
+def strip_ws(rawtext):
+    return ''.join(rawtext.split())
+
+WQC_NUMBER = re.compile(r'WQCApplicationNumber[^0-9]*([0-9-]+)')
+def _read_wqc_number(rawtext):
+    rawtext = strip_ws(rawtext)
+    wqc_numbers = re.findall(WQC_NUMBER, rawtext)
+
+    if len(wqc_numbers) > 1:
+        raise AssertionError('Multiple WQC numbers found')
+    elif len(wqc_numbers) == 0:
+        raise AssertionError('No WQC numbers found')
+
+    no_hyphen = wqc_numbers[0].replace('-', '')
+    if len(no_hyphen) != 8:
+        raise AssertionError('WQC number has the wrong length.')
+
+    return no_hyphen[:6] + '-' + no_hyphen[-2:]
+
+
 MINUTE_COORDS = re.compile(r'(-?\d+)°(\d+)\'([0-9.]+)"([NW])')
 DECIMAL_COORDS = re.compile(r'(lat|latitude|long|longitude)[0-9.]+',
     flags = re.IGNORECASE)
 
 def _read_coords(rawtext, **kwargs):
     "Get coordinates from the notice."
-    rawtext = ''.join(rawtext.split())
+    rawtext = strip_ws(rawtext)
 
     rawcoords = re.findall(MINUTE_COORDS, rawtext)
     if len(rawcoords) > 0:

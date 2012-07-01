@@ -11,9 +11,40 @@ Handling null values:
 
 import os
 import unittest
-from read import read_public_notice, _read_coords, _convert_coords
+from read import read_public_notice, _read_coords, _convert_coords, _read_wqc_number
 
-class TestIndividualFeatures(unittest.TestCase):
+class TestWQC(unittest.TestCase):
+    def setUp(self):
+        self.rawtext = '''
+ttn: Water Quality Certifications
+Post Office Box 4313
+Baton Rouge, LA 70821-4313
+
+(504) 862-2675 FAX (504) 862-2574
+Project Manager
+Jamie Crowe
+Permit Application Number
+MVN 1999-3891 CO
+
+(225) 219-3225 FAX (225) 325-8250
+Project Manager
+Jamie Phillippe
+WQC Application Number
+990825-04
+
+Interested parties are hereby notified that a permit application has been received by the New
+Orleans District of the U.S. Army Corps of Engineers pursuant to: [X] Section 10 of the Rivers and
+Harbors Act of March 3, 1899 (30 Stat. 1151; 33 USC 403); and/or [X] Section 404 of the Clean Water
+Act (86 Stat. 816; 33 USC 1344).
+Application has also been made to the Louisiana Department of Environmental Quality,
+Office of Environmental Services, for a Water Quality Certification (WQC) in accordance with statutory
+authority contained in LRS 30:2074 A(3) and provisions of Section 401 of the Clean Water Act.
+MODIFICATION OF SHIP MOORING FACILITY IN
+'''
+    def test_go(self):
+       self.assertEqual(_read_wqc_number(self.rawtext), '990825-04')
+
+class TestConvertCoords(unittest.TestCase):
     def setUp(self):
         self.rawtext = '''
 Plaquemines Parish, LA; Shell Island East (Pt. 250): Lat 29° 16' 38.24"N / Long -89° 37' 43.91"W; Shell Island
@@ -23,7 +54,7 @@ Long -89° 36' 11.43"W; MR-B (Pt. 13): Lat 29° 22' 52.80"N / Long -89° 34' 36.
 Lat 29° 12' 52.5"N / Long -89° 36' 49.7"W; Section 39-41, T20S-R28E; Section 16-21 ,26-28,34,35,1 3, 24, T218-
 R28E; West of Empire Waten/vay within Bastian Bay area.
 '''
-    def test_coords_minutes_seconds(self):
+    def test_minutes_seconds(self):
         self.maxDiff = None
         observed = _read_coords(self.rawtext, decimal = False)
         expected = [
@@ -42,7 +73,7 @@ R28E; West of Empire Waten/vay within Bastian Bay area.
         _read_coords(self.rawtext, decimal = True) == _read_coords(self.rawtext)
         _read_coords(self.rawtext, decimal = False) != _read_coords(self.rawtext)
 
-    def test_coords_decimal(self):
+    def test_decimal(self):
         observed = _read_coords(self.rawtext, decimal = True)
         expected = [
             # Latitude, longitude
@@ -57,7 +88,6 @@ R28E; West of Empire Waten/vay within Bastian Bay area.
         ]
         self.assertListEqual(observed, expected)
 
-class TestConvertCoords(unittest.TestCase):
     def test_positive(self):
         observed = _convert_coords(29, 16, 38.24 )
         self.assertAlmostEqual(observed, 29.27728888, delta = 10**10)
