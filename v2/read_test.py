@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+# -*- encoding: utf-8 -*-
 """
 Test that the right information is extracted from each pdf
 
@@ -50,17 +52,22 @@ R28E; West of Empire Waten/vay within Bastian Bay area.
 
 class TestConvertCoords(unittest.TestCase):
     def test_positive(self):
-        observed = round(read._convert_coords(29, 16, 38.24 ), 8)
-        self.assertEqual(observed, 29.27728888)
+        observed = read._convert_coords(29, 16, 38.24 )
+        self.assertAlmostEqual(observed, 29.27728888, delta = 10**10)
 
     def test_negative(self):
-        observed = round(read._convert_coords(-89, -37, -43.91 ), 8)
-        self.assertEqual(observed, 89.62886388)
+        observed = _convert_coords(-89, -37, -43.91 )
+        self.assertAlmostEquals(observed, 89.62886388888889, delta = 10**10)
 
     def test_different_signs(self):
         "Sending parameters of different signs raises a ValueError."
         with self.assertRaises(ValueError):
-            read._convert_coords(-89, 37, 43.91 )
+            _convert_coords(-89, 37, 43.91 )
+        with self.assertRaises(ValueError):
+            _convert_coords(0, -37, 43.91 )
+        _convert_coords(0, 37, 43.91 )
+        _convert_coords(0, 0, 43.91 )
+        _convert_coords(0, 0, -43.91 )
 
 class TestReadPublicNotice(unittest.TestCase):
     def setUp(self):
@@ -108,4 +115,6 @@ class TestReadPublicNotice(unittest.TestCase):
             # Within a reasonable boundary
             29 < c[0] < 31
             88 < c[1] < 94
-            
+
+if __name__ == "__main__":
+    unittest.main()
