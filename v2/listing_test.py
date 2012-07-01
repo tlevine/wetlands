@@ -77,19 +77,20 @@ class TestListingRetrieve(unittest.TestCase):
     def tearDown(self):
         os.remove('listings/test.html')
 
-#class TestListingSave(unittest.TestCase):
-#    def setUp(self):
-#        "Load expected JSON."
-#        listingData = open(os.path.join('fixtures', 'listing.json'))
-#        self.data = json.loads(listingData.read())
-#        listingData.close()
+class TestListingSave(unittest.TestCase):
+    def setUp(self):
+        self.connection = pymongo.Connection('localhost')
+        self.db = connection.wetlands_test
 
-#        self.connection = pymongo.Connection('desk')
-#        self.db = self.connection.wetlands_test
+    def test_save_first(self):
+        db.permits.drop()
+        listing_save(self.data, self.db)
+        self.db.findOne()
 
-#    def test_save(self):
-#        listing_save(self.data, self.db)
-#        self.db.find
+    def test_save_again(self):
+        os.system('mongorestore -d wetlands_test fixtures/listing_dump/wetlands_test')
+        listing_save(self.data, self.db)
+        self.db.findOne()
 
 if __name__ == "__main__":
     unittest.main()
