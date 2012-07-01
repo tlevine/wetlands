@@ -24,16 +24,17 @@ Lat 29° 12' 52.5"N / Long -89° 36' 49.7"W; Section 39-41, T20S-R28E; Section 1
 R28E; West of Empire Waten/vay within Bastian Bay area.
 '''
     def test_coords_minutes_seconds(self):
+        self.maxDiff = None
         observed = _read_coords(self.rawtext, decimal = False)
         expected = [
             # Latitude, longitude
-            ( ( 29, 16, 38.24 ) , ( -89, -37, -43.91 ) ),
-            ( ( 29, 17, 49.45 ) , ( -89, -39, -51.73 ) ),
-            ( ( 29, 26, 57.94 ) , ( -89, -36, -11.43 ) ),
-            ( ( 29, 22, 52.80 ) , ( -89, -34, -36.95 ) ),
-            ( ( 29, 21, 04.95 ) , ( -89, -30, -07.18 ) ),
-            ( ( 29, 12, 09.91 ) , ( -89, -38, -36.53 ) ),
-            ( ( 29, 12, 52.5  ) , ( -89, -36, -49.7  ) ),
+            ( ( 29.0, 16.0, 38.24 ) , ( -89.0, -37.0, -43.91 ) ),
+            ( ( 29.0, 17.0, 49.45 ) , ( -89.0, -39.0, -51.73 ) ),
+            ( ( 29.0, 26.0, 57.94 ) , ( -89.0, -36.0, -11.43 ) ),
+            ( ( 29.0, 22.0, 52.80 ) , ( -89.0, -34.0, -36.95 ) ),
+            ( ( 29.0, 21.0, 04.95 ) , ( -89.0, -30.0, -07.18 ) ),
+            ( ( 29.0, 12.0, 09.91 ) , ( -89.0, -38.0, -36.53 ) ),
+            ( ( 29.0, 12.0, 52.5  ) , ( -89.0, -36.0, -49.7  ) ),
         ]
         self.assertListEqual(observed, expected)
 
@@ -45,14 +46,20 @@ R28E; West of Empire Waten/vay within Bastian Bay area.
         observed = _read_coords(self.rawtext, decimal = True)
         expected = [
             # Latitude, longitude
-            ( 29.12345,  -89.1234 ),
+            (29.277288888888886, -89.62886388888889),
+            (29.297069444444446, -89.66436944444445),
+            (29.449427777777778, -89.603175), 
+            (29.381333333333334, -89.57693055555555),
+            (29.351375, -89.50199444444445),
+            (29.20275277777778, -89.64348055555556),
+            (29.214583333333334, -89.61380555555554)
             # &c.
         ]
         self.assertListEqual(observed, expected)
 
 class TestConvertCoords(unittest.TestCase):
     def test_positive(self):
-        observed = read._convert_coords(29, 16, 38.24 )
+        observed = _convert_coords(29, 16, 38.24 )
         self.assertAlmostEqual(observed, 29.27728888, delta = 10**10)
 
     def test_negative(self):
