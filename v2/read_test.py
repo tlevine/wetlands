@@ -11,6 +11,48 @@ import os
 import unittest
 from read import read_public_notice
 
+class TestIndividualFeatures(unittest.TestCase):
+    def setUp(self):
+        self.rawtext = '''
+Plaquemines Parish, LA; Shell Island East (Pt. 250): Lat 29° 16' 38.24"N / Long -89° 37' 43.91"W; Shell Island
+West (Pt. 240): Lat 29° 17' 49.45"N / Long -89° 39' 51 .73"W; Borrow Areas/MR-A (Pt. 3): Lat 29° 26' 57.94"N/
+Long -89° 36' 11.43"W; MR-B (Pt. 13): Lat 29° 22' 52.80"N / Long -89° 34' 36.95"W; MR-E (Pt. 6): Lat 29° 21'
+04.95"N / Long -89° 30' 07.18"W; 35E (Pt. 3): Lat 29° 12' 09.91"N / Long -89° 38' 36.53"W; Borrow Area 9 (Pt. 9):
+Lat 29° 12' 52.5"N / Long -89° 36' 49.7"W; Section 39-41, T20S-R28E; Section 16-21 ,26-28,34,35,1 3, 24, T218-
+R28E; West of Empire Waten/vay within Bastian Bay area.
+'''
+    def test_coords_minutes_seconds(self):
+        observed = _read_coords(self.rawtext, decimal = False)
+        expected = [
+            # Latitude, longitude
+            ( ( 29, 16, 38.24 ) , ( -89, -37, -43.91 ) ),
+            ( ( 29, 17, 49.45 ) , ( -89, -39, -51.73 ) ),
+            ( ( 29, 26, 57.94 ) , ( -89, -36, -11.43 ) ),
+            ( ( 29, 22, 52.80 ) , ( -89, -34, -36.95 ) ),
+            ( ( 29, 21, 04.95 ) , ( -89, -30, -07.18 ) ),
+            ( ( 29, 12, 09.91 ) , ( -89, -38, -36.53 ) ),
+            ( ( 29, 12, 52.5  ) , ( -89, -36, -49.7  ) ),
+        ]
+        self.assertListEqual(observed, expected)
+
+    def test_defaults(self):
+        _read_coords(self.rawtext, decimal = True) == _read_coords(self.rawtext)
+        _read_coords(self.rawtext, decimal = False) != _read_coords(self.rawtext)
+
+    def test_coords_decimal(self):
+        observed = _read_coords(self.rawtext, decimal = True)
+        expected = [
+            # Latitude, longitude
+            ( ( 29, 16, 38.24 ) , ( -89, -37, -43.91 ) ),
+            ( ( 29, 17, 49.45 ) , ( -89, -39, -51.73 ) ),
+            ( ( 29, 26, 57.94 ) , ( -89, -36, -11.43 ) ),
+            ( ( 29, 22, 52.80 ) , ( -89, -34, -36.95 ) ),
+            ( ( 29, 21, 04.95 ) , ( -89, -30, -07.18 ) ),
+            ( ( 29, 12, 09.91 ) , ( -89, -38, -36.53 ) ),
+            ( ( 29, 12, 52.5  ) , ( -89, -36, -49.7  ) ),
+        ]
+        self.assertListEqual(observed, expected)
+
 class TestReadPublicNotice(unittest.TestCase):
     def setUp(self):
         rawtext = open('fixtures/Kilasoethuasoet.pdf.txt').read()
