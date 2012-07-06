@@ -22,8 +22,8 @@ SELECT
   [Project Manager Phone],
 
   -- References
-  [Public Notice],
-  [Drawings],
+  "http://www.mvn.usace.army.mil/ops/regulatory/" || [Public Notice] AS "Public Notice URL",
+  "http://www.mvn.usace.army.mil/ops/regulatory/" || [Drawings] AS "Drawings URL",
 
   -- Further extracts
   [Public Notice Download].text AS pdf_text
