@@ -33,14 +33,14 @@ class Get(BucketMold):
         raw = requests.get(url).content
         self.datetime_scraped = datetime.datetime.now()
 
-        dt.insert({
-            u'scraper_run': scraper_run,
-            u'Bucket': self.bucket,
-            u'kwargs': self.kwargs,
-            u'url': url,
-            u'datetime_scraped': self.datetime_scraped,
-            u'raw': base64.b64encode(raw)
-        }, 'raw_files')
+#       dt.insert({
+#           u'scraper_run': scraper_run,
+#           u'Bucket': self.bucket,
+#           u'kwargs': self.kwargs,
+#           u'url': url,
+#           u'datetime_scraped': self.datetime_scraped,
+#           u'raw': base64.b64encode(raw)
+#       }, 'raw_files')
 
         # Filesystem save (inefficient but convenient)
         os.system(self.bash % self.kwargs)
@@ -260,20 +260,20 @@ if __name__ == '__main__':
         else:
             print('Resuming the partial run from %s' % prev_run)
 
-        # Store raw downloads in a table
-        dt.execute('''
-        CREATE TABLE IF NOT EXISTS raw_files (
-          scraper_run DATE NOT NULL,
-          Bucket TEXT NOT NULL,
-          kwargs JSON NOT NULL,
-          url TEXT NOT NULL,
- 
-          datetime_scraped DATETIME NOT NULL,
-          raw BASE64 TEXT NOT NULL,
- 
-          UNIQUE(scraper_run, Bucket, kwargs)
-          UNIQUE(scraper_run, url)
-        )''')
+#       # Store raw downloads in a table
+#       dt.execute('''
+#       CREATE TABLE IF NOT EXISTS raw_files (
+#         scraper_run DATE NOT NULL,
+#         Bucket TEXT NOT NULL,
+#         kwargs JSON NOT NULL,
+#         url TEXT NOT NULL,
+#
+#         datetime_scraped DATETIME NOT NULL,
+#         raw BASE64 TEXT NOT NULL,
+#
+#         UNIQUE(scraper_run, Bucket, kwargs)
+#         UNIQUE(scraper_run, url)
+#       )''')
  
         # Data associated with the listing page
         dt.execute('''
@@ -295,7 +295,7 @@ if __name__ == '__main__':
           [Project Manager Name] TEXT NOT NULL,
           [Project Manager Phone] TEXT NOT NULL,
  
-          UNIQUE(scraper_run, [PermitApplication No.]),
+          UNIQUE(scraper_run, [PermitApplication No.])
 --        UNIQUE(scraper_run, [Public Notice]),
 --        UNIQUE(scraper_run, Drawings)
         )''')
