@@ -3,6 +3,48 @@ import re
 
 def read_public_notice(rawtext):
     "Get everything from the notice."
+    data = {}
+
+    try:
+        data['Acres'] = _read_acres(rawtext)
+    except Exception, e:
+        data['AcresException'] = unicode(type(e)) + ': ' + unicode(e)
+        data['Acres'] = []
+    else:
+        data['AcresException'] = None
+
+    try:
+        data.update(_read_terms(rawtext))
+    except Exception, e:
+        data['TermsException'] = unicode(type(e)) + ': ' + unicode(e)
+    else:
+        data['TermsException'] = None
+
+    try:
+        data['CUP'] = _read_cup_number(rawtext)
+    except Exception, e:
+        data['CUPException'] = unicode(type(e)) + ': ' + unicode(e)
+        data['CUP'] = u''
+    else:
+        data['CUPException'] = None
+
+    try:
+        data['WQC'] = _read_wqc_number(rawtext)
+    except Exception, e:
+        data['WQCException'] = unicode(type(e)) + ': ' + unicode(e)
+        data['WQC'] = u''
+    else:
+        data['WQCException'] = None
+
+    try:
+        data['Coords'] = _read_coords(rawtext)
+    except Exception, e:
+        data['CoordsException'] = unicode(type(e)) + ': ' + unicode(e)
+        data['Coords'] = []
+    else:
+        data['CoordsException'] = None
+
+    return data
 
 def strip_ws(rawtext):
     return ''.join(rawtext.split())
@@ -13,15 +55,16 @@ def _read_acres(rawtext):
     return [float(a.replace(',', '')) for a in raw]
 
 TERMS = [
-    "mitigationbank",
-    "drill",
-    "road",
-    "section10",
-    "section404"
+    "Mitigation Bank",
+    "Drill",
+    "Road",
+    "Section 10",
+    "Section 404"
 ]
+CLEANTERMS = [t.lower().replace(' ', '') for t in TERMS]
 def _read_terms(rawtext):
     rawtext = strip_ws(rawtext).lower()
-    return {term: term in rawtext for term in TERMS}
+    return {term: (cleanterm in rawtext) for cleanterm, term in zip(CLEANTERMS, TERMS) }
 
 #           --> optionally, list numbers for "cubic yards"  or "material".  this is more difficult.  These will be numbers estimating the volumes of material dredged or filled.
 
@@ -59,7 +102,7 @@ def _read_coords(rawtext, **kwargs):
         return _clean_minute_coords(rawcoords, **kwargs)
 
     rawcoordsd = re.findall(DECIMAL_COORDS, rawtext)
-    return _clean_decimal_coords(rawcoordsd)
+    return _clean_minute_coords(rawcoordsd)
 
 def _clean_minute_coords(rawcoords, decimal = True, verbose = False):
     cleancoords = []

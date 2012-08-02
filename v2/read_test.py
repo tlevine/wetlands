@@ -58,11 +58,11 @@ class TestReadTerms(unittest.TestCase):
     def test_1(self):
         o = _read_terms('mitigation Bank section 404')
         e = {
-            'mitigationbank': True,
-            'drill': False,
-            'road': False,
-            'section10': False,
-            'section404': True,
+            'Mitigation Bank': True,
+            'Drill': False,
+            'Road': False,
+            'Section 10': False,
+            'Section 404': True,
         }
         self.assertDictEqual(o, e)
 
@@ -208,19 +208,32 @@ class TestReadPublicNotice(unittest.TestCase):
         expected = {
             'WQC',
             'CUP',
-            'Mitigation Bank',
             'Acres',
             'Parish',
             'Coords',
             'Basin',
             'HUC',
             '10 acre',
+
+            # Basic terms
+            'Mitigation Bank',
+            'Drill',
+            'Road',
             'Section 10',
             'Section 404',
+
+            'CUPException',
+            'WQCException',
+            'CoordsException',
+            'AcresException',
+            'TermsException',
         }
         self.assertSetEqual(observed, expected)
     def test_types(self):
-        observed = {} # Make this
+        observed = dict(zip(
+            self.data.keys(),
+            [type(v) for v in self.data.values()]
+        ))
         expected = {
             'WQC': unicode,
             'CUP': set,
@@ -235,9 +248,11 @@ class TestReadPublicNotice(unittest.TestCase):
             'Section 404': bool,
         }
 
-        set(observed['Acres']).issubset({float})
-        set(observed['Coords']).issubset({tuple})
-        for c in observed['Coords']:
+        # Check types within lists
+        set(self.data['Acres']).issubset({float})
+        set(self.data['Coords']).issubset({tuple})
+
+        for c in self.data['Coords']:
             # Latitude, longitude
             len(c) == 2
             type(c[0]) == type(c[1]) == float
