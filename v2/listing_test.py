@@ -2,6 +2,7 @@ import os
 import unittest
 import datetime
 import json
+import pymongo
 from listing import listing_retrieve, listing_parse, listing_save
 
 class TestListingParse(unittest.TestCase):
@@ -27,8 +28,8 @@ class TestListingParse(unittest.TestCase):
             'projectDescription': unicode,
             'applicant': unicode,
             'location': unicode,
-            'publicNoticeDate': datetime.date,
-            'expirationDate': datetime.date,
+            'publicNoticeDate': datetime.datetime,
+            'expirationDate': datetime.datetime,
             'permitApplicationNumber': unicode,
             'publicNoticeUrl': unicode,
             'drawingsUrl': unicode,
@@ -80,10 +81,10 @@ class TestListingRetrieve(unittest.TestCase):
 class TestListingSave(unittest.TestCase):
     def setUp(self):
         self.connection = pymongo.Connection('localhost')
-        self.db = connection.wetlands_test
+        self.db = self.connection.wetlands_test
 
     def test_save_first(self):
-        db.permits.drop()
+        self.db.permits.drop()
         listing_save(self.data, self.db)
         self.db.findOne()
 
