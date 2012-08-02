@@ -83,15 +83,18 @@ class TestListingSave(unittest.TestCase):
         self.connection = pymongo.Connection('localhost')
         self.db = self.connection.wetlands_test
 
+        listingData = open(os.path.join('fixtures', 'listing.json'))
+        self.data = json.loads(listingData.read())
+
     def test_save_first(self):
         self.db.permits.drop()
         listing_save(self.data, self.db)
-        self.db.findOne()
+        self.db.permit.find_one()
 
     def test_save_again(self):
         os.system('mongorestore -d wetlands_test fixtures/listing_dump/wetlands_test')
         listing_save(self.data, self.db)
-        self.db.findOne()
+        self.db.permit.find_one()
 
 if __name__ == "__main__":
     unittest.main()

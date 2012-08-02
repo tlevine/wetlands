@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -e
+. ./papers.sh
+
+python2 listing.py
+# paper
+# translate

@@ -6,8 +6,13 @@ from unidecode import unidecode
 from urllib2 import urlopen
 
 DATETIME = datetime.datetime.now()
-#connection = pymongo.Connection('localhost')
-#db = connection.wetlands
+connection = pymongo.Connection('localhost')
+db = connection.wetlands
+
+def main():
+    html = listing_retrieve()
+    data = listing_parse(html)
+    listing_save(data, db)
 
 def listing_retrieve(
         url = 'http://www.mvn.usace.army.mil/ops/regulatory/publicnotices.asp?ShowLocationOrder=False',
@@ -192,7 +197,7 @@ _COLNAMES = [
 def _parsedate(rawdate):
     return datetime.datetime.strptime(rawdate, '%m/%d/%Y')
 
-QUIET = True
+QUIET = False
 
 def _log(foo):
     if QUIET == False:
@@ -218,3 +223,6 @@ def _onenode(html, xpath):
         _RRRaise(AssertionError('Not exactly one node'))
     else:
         return nodes[0]
+
+if __name__ == '__main__':
+    main()
