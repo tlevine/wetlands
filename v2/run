@@ -4,5 +4,10 @@ set -e
 . ./papers.sh
 
 python2 listing.py
-# paper
-# translate
+# paper --permit [permit number] \
+#   --url [url] \
+#   --papertype [public_notice or drawings] \
+#   --date [like 2012-04-01]
+
+# translate "${file}"
+# cat "${file}" > 
