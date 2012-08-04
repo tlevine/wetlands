@@ -9,7 +9,7 @@ setup () {
 
 runtests() {
   text="ARMY"
-  assert 'The text file is created in the right place' [ -e fixtures/Kilbride\ PN.pdf.txt ]
+# assert 'The text file is created in the right place' [ -e fixtures/Kilbride\ PN.pdf.txt ]
   assert "The text file contains the text \"$text\"" \
     [ "`grep -c \"$text\" fixtures/Kilbride\ PN.pdf.txt`" != '0' ]
 }
