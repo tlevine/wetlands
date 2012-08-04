@@ -56,14 +56,6 @@ after the document type ("public_notice" or "drawings") and the date of download
         ${papertype}-${date}.pdf # Pdf
         ${papertype}-${date}.md5 # Md5sum
 
-Every time the updater script is run, all pdf files linked from the listing
-page are downloaded and saved as indicated above. Next, the script uses the
-md5sum to check whether the file matches the current version (that is, the
-one to which the symlink points). If the files match, the file that was just
-downloaded is deleted. If they differ, the file is kept, the symlinks are
-adjusted to point to the just-downloaded file, and the pdfs git repository
-submodule is committed.
-
 Most often, there will only be one version of each of the files in a
 particular permit's directory, for a total of eight files:
 \begin{enumerate}
@@ -89,3 +81,17 @@ notices.)
     public_notice.pdf -> public_notice-2012-05-08.pdf
     public_notice.pdf.md5 -> public_notice-2012-05-08.pdf.md5
 
+Every time the updater script is run, all pdf files linked from the listing
+page are downloaded and saved as indicated above. Next, the script uses the
+md5sum to check whether the file matches the current version (that is, the
+one to which the symlink points).
+
+If the files match, the file that was just downloaded is deleted. If they
+differ, the file is kept, the symlinks are adjusted to point to the
+just-downloaded file, the pdfs git repository submodule is committed,
+the file is parsed, and the resulting information is saved to the database.
+
+Regardless of whether the files match, the database is updated to indicate
+that the public notice or drawing associated with the appropriate permit
+was downloaded. It does this by adding a date to the `scriptRuns` field
+in the permit document.
