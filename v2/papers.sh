@@ -23,7 +23,7 @@ paper() {
   file="$dir/$papertype-$date.pdf"
   link="$dir/$papertype.pdf"
 
-  # Don't download the same file twice in a row.
+  # Don't download the file if I've already downloaded it today.
   if [ -e "$file" ]
     then
     return
