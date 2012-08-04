@@ -1,0 +1,4 @@
+#!/bin/sh
+
+pacman -S --needed \
+  tesseract-data-eng tesseract python2
