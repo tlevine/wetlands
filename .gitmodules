@@ -1,0 +1,3 @@
+[submodule "v2/listings"]
+	path = v2/listings
+	url = git@github.com:tlevine/wetlands-listings.git
