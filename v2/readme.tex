@@ -35,7 +35,12 @@ I separate the process into these steps. These steps are run each day.
   \item Query the database for disturbing notices.
   \item Email the appropriate people.
   \end{enumerate}
-\item Display things pretty-like on a website.
+\item Alert things pretty-like.
+  \begin{enumerate}
+  \item Minimally, this is a spreadsheet.
+  \item This could be a website.
+  \item This could pick out applications that look bad.
+  \end{enumerate}
 \end{enumerate}
 
 Metadata are stored inside a mongodb, and files are stored on a filesystem.
@@ -114,6 +119,6 @@ the file is parsed, and the resulting information is saved to the database.
 
 Regardless of whether the files match, the database is updated to indicate
 that the public notice or drawing associated with the appropriate permit
-was downloaded. It does this by adding a date to the `scriptRuns` field
-in the permit document.
+was downloaded. It does this by adding a date to the
+\begin{texttt}scriptRuns\end{texttt} field in the permit document.
 \end{document}
