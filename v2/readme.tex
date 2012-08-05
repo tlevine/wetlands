@@ -1,3 +1,15 @@
+\documentclass{article}
+\usepackage{alltt}
+
+\title{Tracking Wetland Building Permit Applications}
+\author{Thomas Levine}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+\section{Technical overview}
 I separate the process into these steps. These steps are run each day.
 
 \begin{enumerate}
@@ -28,33 +40,40 @@ I separate the process into these steps. These steps are run each day.
 
 Metadata are stored inside a mongodb, and files are stored on a filesystem.
 
-Look at `runtests` to see more precisely how this works.
+If anything in the current document leaves you wanting more information, look
+at \begin{texttt}runtests\end{texttt} to see more precisely how this works.
+Also, the The schema is defined in \begin{texttt}listing.py\end{texttt} in
+\begin{texttt}listing\_save\end{texttt}.
 
-`install_dependencies` should install dependencies on Arch.
-
-The schema is defined in `listing.py` in `listing_save`.
+\subsection{Dependencies}
+The system requires a MongoDB (though that will probably be replaced with a
+CouchDB), Python, tesseract, Urchin and probably other non-standard things.
+\begin{texttt}install\_dependencies\end{texttt} should install dependencies
+on Arch.
 
 \section{Listing page}
-The listing page is downloaded and saved to `listings/[date].html`.
-The majority of the database activity is in this part (`listings.py`).
+The listing page is downloaded and saved to \begin{texttt}listings/[date].html\end{texttt}.
+The majority of the database activity is in this part (\begin{texttt}listings.py\end{texttt}).
 
 \section{Downloading pdfs}
 Given information about the public notices and drawings linked by the listing
-page, `papers.sh` downloads the notices, archives them in the filesystem
+page, \begin{texttt}papers.sh\end{texttt} downloads the notices, archives them in the filesystem
 and tells the database that an update has occurred.
 
 All of the pdfs are stored inside the `pdfs` directory. The directory contains
 a subdirectory for each permit, named after the permit number (like
 "MVN-2011-2935-EFF"). Within the permit directory are a bunch of pdf files,
 associated md5sums and four symlinks. The pdf files and md5sums are named
-after the document type ("public_notice" or "drawings") and the date of download
+after the document type ("public\_notice" or "drawings") and the date of download
 (like "2012-05-08"). The symlinks refer to the most recent version of the file.
 
-    pdfs/
-      ${permitnumber}/
-        ${papertype}.{pdf,md5} # Links
-        ${papertype}-${date}.pdf # Pdf
-        ${papertype}-${date}.md5 # Md5sum
+\begin{alltt}
+pdfs/
+  ${permitnumber}/
+    ${papertype}.{pdf,md5} # Links
+    ${papertype}-${date}.pdf # Pdf
+    ${papertype}-${date}.md5 # Md5sum
+\end{alltt}
 
 Most often, there will only be one version of each of the files in a
 particular permit's directory, for a total of eight files:
@@ -72,14 +91,16 @@ particular permit's directory, for a total of eight files:
 Here is an example of such directory. (Well, this one only has the public
 notices.)
 
-    drawings-2012-05-08.pdf
-    drawings-2012-05-08.pdf.md5
-    drawings.pdf -> drawings-2012-05-08.pdf
-    drawings.pdf.md5 -> drawings-2012-05-08.pdf.md5
-    public_notice-2012-05-08.pdf
-    public_notice-2012-05-08.pdf.md5
-    public_notice.pdf -> public_notice-2012-05-08.pdf
-    public_notice.pdf.md5 -> public_notice-2012-05-08.pdf.md5
+\begin{alltt}
+drawings-2012-05-08.pdf
+drawings-2012-05-08.pdf.md5
+drawings.pdf -> drawings-2012-05-08.pdf
+drawings.pdf.md5 -> drawings-2012-05-08.pdf.md5
+public\_notice-2012-05-08.pdf
+public\_notice-2012-05-08.pdf.md5
+public\_notice.pdf -> public_notice-2012-05-08.pdf
+public\_notice.pdf.md5 -> public_notice-2012-05-08.pdf.md5
+\end{alltt}
 
 Every time the updater script is run, all pdf files linked from the listing
 page are downloaded and saved as indicated above. Next, the script uses the
@@ -95,3 +116,4 @@ Regardless of whether the files match, the database is updated to indicate
 that the public notice or drawing associated with the appropriate permit
 was downloaded. It does this by adding a date to the `scriptRuns` field
 in the permit document.
+\end{document}
