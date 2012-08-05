@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage{alltt}
+% \usepackage{alltt}
 
 \title{Tracking Wetland Building Permit Applications}
 \author{Thomas Levine}
@@ -79,13 +79,13 @@ associated md5sums and four symlinks. The pdf files and md5sums are named
 after the document type ("public\_notice" or "drawings") and the date of download
 (like "2012-05-08"). The symlinks refer to the most recent version of the file.
 
-\begin{alltt}
+\begin{verbatim}
 pdfs/
   ${permitnumber}/
     ${papertype}.{pdf,md5} # Links
     ${papertype}-${date}.pdf # Pdf
     ${papertype}-${date}.md5 # Md5sum
-\end{alltt}
+\end{verbatim}
 
 Most often, there will only be one version of each of the files in a
 particular permit's directory, for a total of eight files:
@@ -100,19 +100,18 @@ particular permit's directory, for a total of eight files:
 \item Link to the drawings pdf md5sum
 \end{enumerate}
 
-Here is an example of such directory. (Well, this one only has the public
-notices.)
+Here is an example of such directory.
 
-\begin{alltt}
+\begin{verbatim}
 drawings-2012-05-08.pdf
 drawings-2012-05-08.pdf.md5
 drawings.pdf -> drawings-2012-05-08.pdf
 drawings.pdf.md5 -> drawings-2012-05-08.pdf.md5
-public\_notice-2012-05-08.pdf
-public\_notice-2012-05-08.pdf.md5
-public\_notice.pdf -> public_notice-2012-05-08.pdf
-public\_notice.pdf.md5 -> public_notice-2012-05-08.pdf.md5
-\end{alltt}
+public_notice-2012-05-08.pdf
+public_notice-2012-05-08.pdf.md5
+public_notice.pdf -> public_notice-2012-05-08.pdf
+public_notice.pdf.md5 -> public_notice-2012-05-08.pdf.md5
+\end{verbatim}
 
 Every time the updater script is run, all pdf files linked from the listing
 page are downloaded and saved as indicated above. Next, the script uses the
