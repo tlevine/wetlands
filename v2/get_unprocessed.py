@@ -10,13 +10,28 @@ format. These parameters are
 Output might look like this.
 
 permit	url	papertype	date
-MVN-2010-0024-EII	http://www.mvn.usace.army.mil/ops/regulatory/pdf/MVN-2010-0024-EIIJPN.pdf	public_notice
-MVN-2010-0024-EII	http://www.mvn.usace.army.mil/ops/regulatory/pdf/MVN-2010-0024DWG.pdf	drawings
+MVN-2010-0024-EII	http://www.mvn.usace.army.mil/ops/regulatory/pdf/MVN-2010-0024-EIIJPN.pdf	publicNotice
+MVN-2010-0024-EII	http://www.mvn.usace.army.mil/ops/regulatory/pdf/MVN-2010-0024DWG.pdf	drawing
 
 They are sorted by papertype in order of priority; public notices are first.
 """
 import pymongo
 
-connection = pymongo.Connection('localhost')
-db = connection.wetlands
-# db.permits.find_one
+def main():
+    connection = pymongo.Connection('localhost')
+    db = connection.wetlands
+    for papertype in {'publicNotice', 'drawing'}:
+        print_tsv(db, papertype)
+
+def print_tsv(db, papertype):
+    "Print a tsv for the documents queried from the database."
+    query = db.permit.find({papertype + '.processed': False})
+    for doc in query:
+        print('\t'.join([
+          doc['permitApplicationNumber'],
+          doc[papertype]['url'],
+          papertype
+       ]))
+
+if __name__ == '__main__':
+    main()
