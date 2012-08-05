@@ -154,7 +154,8 @@ def listing_save(data, db):
         # If the permitApplicationNumber doesn't exist
         db.permit.update({"_id": doc_new['_id']}, doc_new, upsert = True) 
  
-        # Now that it does
+        # Even if it was already there, set it as unprocessed so we know to
+        # process it.
         db.permit.update(
             {"_id": doc_new['_id']},
             {"$push": {"scriptRuns": DATETIME}}
