@@ -17,12 +17,26 @@ They are sorted by papertype in order of priority; public notices are first.
 """
 import pymongo
 
-def main():
+def main(outputformat):
     connection = pymongo.Connection('localhost')
     db = connection.wetlands
     print('permit\turl\tpapertype')
     for papertype in {'publicNotice', 'drawing'}:
-        print_tsv(db, papertype)
+        if outputformat == 'tsv':
+            print_tsv(db, papertype)
+        elif outputformat == 'sh':
+            print_sh(db, papertype)
+
+def print_sh(db, papertype):
+    "Print a paper command the documents queried from the database."
+    query = db.permit.find({papertype + '.processed': False})
+    for doc in query:
+        print('paper '
+            "--permit '%s'"
+            "--url '%s'"
+            "--papertype '%s'"
+            % (doc['permitApplicationNumber'], doc[papertype]['url'], papertype)
+        ) 
 
 def print_tsv(db, papertype):
     "Print a tsv for the documents queried from the database."
@@ -35,4 +49,4 @@ def print_tsv(db, papertype):
        ]))
 
 if __name__ == '__main__':
-    main()
+    main('sh')
