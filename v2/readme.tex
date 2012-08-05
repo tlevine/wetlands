@@ -12,6 +12,7 @@
 \section{Technical overview}
 I separate the process into these steps. These steps are run each day.
 
+This first group of steps has a natural order.
 \begin{enumerate}
 \item Listing
   \begin{enumerate}
@@ -30,18 +31,24 @@ I separate the process into these steps. These steps are run each day.
   \item Run optical character recognition on new pdfs, and save results to the filesystem.
   \item Try to extract the information of interest from new pdfs.
   \item Save the information of interest to the database.
+\end{enumerate}
+
+The following group of steps must be run after the first group, but it can be
+run in any order.
+\begin{itemize}
 \item Send alerts
   \begin{enumerate}
   \item Query the database for disturbing notices.
   \item Email the appropriate people.
   \end{enumerate}
-\item Alert things pretty-like.
+\item Display things pretty-like.
   \begin{enumerate}
   \item Minimally, this is a spreadsheet.
-  \item This could be a website.
-  \item This could pick out applications that look bad.
+  \item This could be graphs and maps and stuff.
+  \item This could be a website that helps in managing the response to the
+  permit application
   \end{enumerate}
-\end{enumerate}
+\end{itemize}
 
 Metadata are stored inside a mongodb, and files are stored on a filesystem.
 
