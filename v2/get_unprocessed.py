@@ -20,6 +20,7 @@ import pymongo
 def main():
     connection = pymongo.Connection('localhost')
     db = connection.wetlands
+    print('permit\turl\tpapertype')
     for papertype in {'publicNotice', 'drawing'}:
         print_tsv(db, papertype)
 
