@@ -32,9 +32,9 @@ def print_sh(db, papertype):
     query = db.permit.find({papertype + '.processed': False})
     for doc in query:
         print('paper '
-            "--permit '%s'"
-            "--url '%s'"
-            "--papertype '%s'"
+            "--permit '%s' "
+            "--url '%s' "
+            "--papertype '%s' "
             % (doc['permitApplicationNumber'], doc[papertype]['url'], papertype)
         ) 
 

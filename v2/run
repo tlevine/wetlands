@@ -3,11 +3,13 @@
 set -e
 . ./papers.sh
 
+# Save the listing page.
 python2 listing.py
-# paper --permit [permit number] \
-#   --url [url] \
-#   --papertype [public_notice or drawings] \
-#   --date [like 2012-04-01]
+
+# Save unprocessed pdf files.
+runpapers=$(mktemp)
+python2 get_unprocessed.py > $runpapers
+sh $runpapers
 
 # translate "${file}"
 # cat "${file}" > 
