@@ -1,6 +1,11 @@
 # -*- encoding: utf-8 -*-
 import re
 
+def main():
+    import sys
+    data = read_public_notire(sys.stdin.read())
+    print data
+
 def read_public_notice(rawtext):
     "Get everything from the notice."
     data = {}
@@ -166,3 +171,6 @@ def _convert_coords(degrees, minutes, seconds):
             raise ValueError('All arguments must have the same sign.')
 
     return degrees + minutes/60 + seconds/3600
+
+if __name__ == '__main__':
+    main()

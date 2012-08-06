@@ -9,17 +9,24 @@ set -e
 tsv=$(mktemp)
 while true
   do
-  # Save unprocessed pdf files.
-  python2 get_unprocessed.py tsv | sed 1d > $tsv
-  permit=$(cat $tsv|cut -f1)
-  papertype=$(cat $tsv|cut -f3)
-  break
-  
-  file="pdfs/$permit/$papertype-$(date -I).pdf"
-# echo $permit
-# grep $permit $permits
-# echo $file
+  # Save unprocessed pdf files, and stop when finished
+  python2 get_unprocessed.py tsv | sed 1d > $tsv || break
 
-# translate "${file}"
-# cat "${file}" > 
+  permit=$(cat $tsv|cut -f1)
+  url="http://www.mvn.usace.army.mil/ops/regulatory/$(cat $tsv|cut -f2)"
+  papertype=$(cat $tsv|cut -f3)
+  
+  dir="pdfs/$permit"
+  paper \
+    --permit "${permit}" \
+    --url "${url}" \
+    --papertype "${papertype}"
+
+  file="$(readlink $dir/$papertype.pdf)"
+
+# This is broken; I should need to do this to get the whole path.
+# echo $dir$file
+
+  translate "${file}"
+  cat "${file}".txt | python2 read.py
 done

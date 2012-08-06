@@ -3,7 +3,7 @@
 paper() {
   set -e
 
-  USAGE="usage: $0 --permit [permit number] --url [url] --papertype [public_notice or drawings] --date [like 2012-04-01]"
+  USAGE="usage: $0 --permit [permit number] --url [url] --papertype [public_notice or drawings]"
 
   while [ $# -gt 0 ]
   do
@@ -11,7 +11,6 @@ paper() {
           --papertype) papertype="$2" && shift;;
           --url) url="$2" && shift;;
           --permit) permit="$2" && shift;;
-          --date) date="$2" && shift;;
           -*) echo >&2 $USAGE
               exit 1;;
           *)  break;;
@@ -19,6 +18,7 @@ paper() {
       shift
   done
 
+  date=$(date -I)
   dir="pdfs/$permit"
   file="$dir/$papertype-$date.pdf"
   link="$dir/$papertype.pdf"
