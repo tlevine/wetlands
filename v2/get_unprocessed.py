@@ -1,7 +1,7 @@
 """
-When run from the command line, this returns a list of documents to be
-processed. Output includes the parameters needed for paper in a tab-delimeted
-format. These parameters are
+When run from the command line, this returns a documents to be processed.
+Output includes the parameters needed for paper in a tab-delimeted format.
+These parameters are
 
 * permit
 * url
@@ -13,7 +13,6 @@ permit	url	papertype
 MVN-2010-0024-EII	http://www.mvn.usace.army.mil/ops/regulatory/pdf/MVN-2010-0024-EIIJPN.pdf	publicNotice
 MVN-2010-0024-EII	http://www.mvn.usace.army.mil/ops/regulatory/pdf/MVN-2010-0024DWG.pdf	drawing
 
-They are sorted by papertype in order of priority; public notices are first.
 """
 import sys
 import pymongo
