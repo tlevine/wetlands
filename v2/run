@@ -6,22 +6,18 @@ set -e
 # Save the listing page.
 # python2 listing.py
 
-# Save unprocessed pdf files.
-permits=$(mktemp)
-permitspipe=$(mktemp)
-python2 get_unprocessed.py permitonly > $permits
-cat $permits | tr ' ' '|' > $permitspipe
-runpapers=$(mktemp)
-python2 get_unprocessed.py sh > $runpapers
-
-for permitpipe in `cat $permitspipe`
+tsv=$(mktemp)
+while true
   do
-  permit="`echo $permitpipe | tr '|' ' '`"
+  # Save unprocessed pdf files.
+  python2 get_unprocessed.py tsv | sed 1d > $tsv
+  cat $tsv
+  break
   
   file="pdfs/$permit/$papertype-$(date -I).pdf"
 # echo $permit
 # grep $permit $permits
-  echo $file
+# echo $file
 
 # translate "${file}"
 # cat "${file}" > 

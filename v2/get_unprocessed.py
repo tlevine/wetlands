@@ -11,8 +11,9 @@ Output might look like this.
 
 permit	url	papertype
 MVN-2010-0024-EII	http://www.mvn.usace.army.mil/ops/regulatory/pdf/MVN-2010-0024-EIIJPN.pdf	publicNotice
-MVN-2010-0024-EII	http://www.mvn.usace.army.mil/ops/regulatory/pdf/MVN-2010-0024DWG.pdf	drawing
 
+It returns publicNotices until all of those are processed, then it returns
+drawings.
 """
 import sys
 import pymongo
@@ -23,13 +24,20 @@ def main(outputformat):
     db = connection.wetlands
     for papertype in {'publicNotice', 'drawings'}:
         doc = db.permit.find_one({papertype + '.processed': False})
-        if doc[papertype]['url'] == None:
+        if doc == None:
+            print 'No more documents to process'
+            exit(1)
+
+        elif doc[papertype]['url'] == None:
             continue
 
         if outputformat == 'tsv':
             print_tsv(doc, papertype)
         elif outputformat == 'sh':
             print_sh(doc, papertype)
+
+        # Only print one
+        break
 
 def print_sh(doc, papertype):
     "Print a paper command the documents queried from the database."
