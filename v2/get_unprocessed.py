@@ -9,44 +9,46 @@ format. These parameters are
 
 Output might look like this.
 
-permit	url	papertype	date
+permit	url	papertype
 MVN-2010-0024-EII	http://www.mvn.usace.army.mil/ops/regulatory/pdf/MVN-2010-0024-EIIJPN.pdf	publicNotice
 MVN-2010-0024-EII	http://www.mvn.usace.army.mil/ops/regulatory/pdf/MVN-2010-0024DWG.pdf	drawing
 
 They are sorted by papertype in order of priority; public notices are first.
 """
+import sys
 import pymongo
 
 def main(outputformat):
+    'outputformat must be "sh", "tsv" or "permitonly"'
     connection = pymongo.Connection('localhost')
     db = connection.wetlands
-    print('permit\turl\tpapertype')
-    for papertype in {'publicNotice', 'drawing'}:
+    for papertype in {'publicNotice', 'drawings'}:
+        doc = db.permit.find_one({papertype + '.processed': False})
+        if doc[papertype]['url'] == None:
+            continue
+
         if outputformat == 'tsv':
-            print_tsv(db, papertype)
+            print_tsv(doc, papertype)
         elif outputformat == 'sh':
-            print_sh(db, papertype)
+            print_sh(doc, papertype)
 
-def print_sh(db, papertype):
+def print_sh(doc, papertype):
     "Print a paper command the documents queried from the database."
-    query = db.permit.find({papertype + '.processed': False})
-    for doc in query:
-        print('paper '
-            "--permit '%s' "
-            "--url '%s' "
-            "--papertype '%s' "
-            % (doc['permitApplicationNumber'], doc[papertype]['url'], papertype)
-        ) 
+    print('paper '
+        "--permit '%s' "
+        "--url '%s' "
+        "--papertype '%s' "
+        % (doc['permitApplicationNumber'], doc[papertype]['url'], papertype)
+    ) 
 
-def print_tsv(db, papertype):
+def print_tsv(doc, papertype):
     "Print a tsv for the documents queried from the database."
-    query = db.permit.find({papertype + '.processed': False})
-    for doc in query:
-        print('\t'.join([
-          doc['permitApplicationNumber'],
-          doc[papertype]['url'],
-          papertype
-       ]))
+    print('permit\turl\tpapertype')
+    print('\t'.join([
+      doc['permitApplicationNumber'],
+      doc[papertype]['url'],
+      papertype
+    ]))
 
 if __name__ == '__main__':
-    main('sh')
+    main(sys.argv[1])
