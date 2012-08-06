@@ -31,30 +31,35 @@ def main(outputformat):
         elif doc[papertype]['url'] == None:
             continue
 
+        if papertype == 'drawings':
+            shpapertype = 'drawing'
+        elif papertype == 'publicNotice':
+            shpapertype = 'public_notice'
+
         if outputformat == 'tsv':
-            print_tsv(doc, papertype)
+            print_tsv(doc, papertype, shpapertype)
         elif outputformat == 'sh':
-            print_sh(doc, papertype)
+            print_sh(doc, papertype, shpapertype)
 
         # Only print one
         break
 
-def print_sh(doc, papertype):
+def print_sh(doc, papertype, shpapertype):
     "Print a paper command the documents queried from the database."
     print('paper '
         "--permit '%s' "
         "--url '%s' "
         "--papertype '%s' "
-        % (doc['permitApplicationNumber'], doc[papertype]['url'], papertype)
+        % (doc['permitApplicationNumber'], doc[papertype]['url'], shpapertype)
     ) 
 
-def print_tsv(doc, papertype):
+def print_tsv(doc, papertype, shpapertype):
     "Print a tsv for the documents queried from the database."
     print('permit\turl\tpapertype')
     print('\t'.join([
       doc['permitApplicationNumber'],
       doc[papertype]['url'],
-      papertype
+      shpapertype
     ]))
 
 if __name__ == '__main__':

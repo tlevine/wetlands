@@ -11,7 +11,8 @@ while true
   do
   # Save unprocessed pdf files.
   python2 get_unprocessed.py tsv | sed 1d > $tsv
-  cat $tsv
+  permit=$(cat $tsv|cut -f1)
+  papertype=$(cat $tsv|cut -f3)
   break
   
   file="pdfs/$permit/$papertype-$(date -I).pdf"
