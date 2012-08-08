@@ -26,7 +26,8 @@ paper() {
   # Don't download the file if I've already downloaded it today.
   if [ -e "$file" ]
     then
-    return
+    echo The file was already downloaded today. >&2
+    return 1
   fi
 
   mkdir -p "$dir"
@@ -63,5 +64,9 @@ paper() {
     # mongo wetlands --eval "db.permits"
 
   fi
+
+  # Return the file name
+  echo $file
+  return 0
 }
 

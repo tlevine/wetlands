@@ -17,16 +17,12 @@ while true
   papertype=$(cat $tsv|cut -f3)
   
   dir="pdfs/$permit"
-  paper \
+  file=$(paper \
     --permit "${permit}" \
     --url "${url}" \
-    --papertype "${papertype}"
+    --papertype "${papertype}")
 
-  file="$(readlink $dir/$papertype.pdf)"
+  ./translate "${file}"
 
-# This is broken; I should need to do this to get the whole path.
-# echo $dir$file
-
-  translate "${file}"
   cat "${file}".txt | python2 read.py
 done

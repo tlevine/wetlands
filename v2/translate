@@ -6,16 +6,19 @@ FILE="$1"
 
 # Extract images.
 # Use jpeg so we don't have to determine whether ppm or pbm is used.
-pdfimages -j "$FILE" "$FILE"
+pdfimages "$FILE" "$FILE"
 
 # Extract text to `echo $FILE|sed s/pdf$/txt/`
 pdftotext "$FILE"
 mv "`echo \"$FILE\"|sed s/pdf$/txt/`" "$FILE.txt"
 
 # OCR
-for file in "$FILE"-[0-9][0-9][0-9].jpg
+for extension in pbm ppm
   do
-  echo $file
-  tesseract "$file" "$file"
-  cat "$file.txt" >> "$FILE.txt"
+  for file in "$FILE"-[0-9][0-9][0-9]."${extension}"
+    do
+    echo $file
+    tesseract "$file" "$file"
+    cat "$file.txt" >> "$FILE.txt"
+  done
 done
