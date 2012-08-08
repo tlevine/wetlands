@@ -10,7 +10,7 @@ tsv=$(mktemp)
 while true
   do
   # Save unprocessed pdf files, and stop when finished
-  python2 get_unprocessed.py tsv | sed 1d > $tsv || break
+  python2 get_unprocessed.py tsv | sed 1d > $tsv 
 
   permit=$(cat $tsv|cut -f1)
   url="http://www.mvn.usace.army.mil/ops/regulatory/$(cat $tsv|cut -f2)"
