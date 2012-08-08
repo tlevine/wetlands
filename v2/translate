@@ -17,6 +17,10 @@ for extension in pbm ppm
   do
   for file in "$FILE"-[0-9][0-9][0-9]."${extension}"
     do
+
+    # In case no files match this glob
+    [ -e $file ] || continue
+
     echo $file
     tesseract "$file" "$file"
     cat "$file.txt" >> "$FILE.txt"
