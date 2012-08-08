@@ -25,4 +25,7 @@ while true
   ./translate "${file}"
 
   cat "${file}".txt | python2 read.py
+
+  echo Do something with that python dict output.
+  exit 1
 done

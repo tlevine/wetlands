@@ -3,7 +3,7 @@ import re
 
 def main():
     import sys
-    data = read_public_notire(sys.stdin.read())
+    data = read_public_notice(sys.stdin.read())
     print data
 
 def read_public_notice(rawtext):
