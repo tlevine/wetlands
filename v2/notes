@@ -1,8 +1,20 @@
+# Thoughts on architecture
+This would work very nicely with Couch; I'm not storing much in the database,
+and the web interface would be convenient; see the hilariously-named
+"Wetlands architecture" diagram. These would read and write from the Couch.
+
+* Listings downloader
+* Reader workers
+* Email correspondance linker
+* Website
+
+Some of the above workers would access a file server that stores listings html
+pages, public notice pdfs and drawings pdfs. Writes might be over some other
+protocol, but reads from the server would be over HTTP so that it could be
+reused for the website.
 
 
-
-# New version with OCR and whatnot
-(Email to Scott et al.)
+# New version with OCR and whatnot (Email to Scott et al.)
 
 I've come up with a new version that OCRs the text. I've run it on the pages
 that I archived with the earlier version. Every time it runs, it updates
