@@ -4,17 +4,6 @@ set -e
 
 FILE="$1"
 
-# Skip if already done
-if [ -e "${FILE}.txt" ]
-  then
-  echo The translation step seems to be finished. If you want to run it again,
-  echo clear the cache like so.
-  echo \  
-  echo "  rm ${FILE}.txt"
-  echo \  
-  exit 1
-fi
-
 # Extract images.
 # Use jpeg so we don't have to determine whether ppm or pbm is used.
 pdfimages "$FILE" "$FILE"

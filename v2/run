@@ -32,6 +32,7 @@ while true
   # because get_unprocessed.py returns it; run the translator.
   ./translate "${file}" || exit 1
 
+  # Read the text and save it.
   cat "${file}".txt | python2 read.py "${permit}" "${papertype}"
 
   echo \ 
