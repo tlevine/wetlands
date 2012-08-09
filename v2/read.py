@@ -32,6 +32,18 @@ def main():
     # Save
     collection.insert(doc)
 
+    # Database column names (arg why did I use different ones...)
+    paperType = {
+        'public_notice': 'publicNotice',
+        'drawings': 'drawings',
+    }[papertype]
+
+    # Mark as processed
+    db.permit.update(
+        {"_id": permit},
+        {"$set": {paperType + ".processed": True }}
+    )
+
 def read_public_notice(rawtext):
     "Get everything from the notice."
     data = {}

@@ -18,9 +18,9 @@ while true
   
   dir="pdfs/$permit"
 
-  echo '----------------------------------------'
+  echo '------------------------------------------------------------'
   echo Working on the "${permit} ${papertype}"
-  echo '----------------------------------------'
+  echo '------------------------------------------------------------'
 
   # Has the file been downloaded? Download if not.
   file=$(paper \
@@ -36,7 +36,7 @@ while true
   cat "${file}".txt | python2 read.py "${permit}" "${papertype}"
 
   echo \ 
-  echo '----------------------------------------'
+  echo '------------------------------------------------------------'
   echo \ 
   echo \ 
   echo \ 
