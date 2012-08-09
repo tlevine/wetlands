@@ -2,15 +2,17 @@
 
 set -e
 . ./papers.sh
+set -e
 
 # Save the listing page.
-# python2 listing.py
+python2 listing.py
 
 tsv=$(mktemp)
 while true
   do
   # Save unprocessed pdf files, and stop when finished
-  python2 get_unprocessed.py tsv | sed 1d > $tsv
+  tsvtext="$(python2 get_unprocessed.py tsv)"
+  echo "${tsvtext}" | sed 1d > $tsv
 
   permit=$(cat $tsv|cut -f1)
   url="http://www.mvn.usace.army.mil/ops/regulatory/$(cat $tsv|cut -f2)"

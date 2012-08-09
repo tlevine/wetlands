@@ -22,7 +22,7 @@ def main(outputformat):
     'outputformat must be "sh", "tsv" or "permitonly"'
     connection = pymongo.Connection('localhost')
     db = connection.wetlands
-    for papertype in {'publicNotice', 'drawings'}:
+    for papertype in ['publicNotice', 'drawings']:
         doc = db.permit.find_one({papertype + '.processed': False})
         if doc == None:
             print 'No more documents to process'

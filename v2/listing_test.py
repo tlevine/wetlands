@@ -3,7 +3,10 @@ import unittest
 import datetime
 import json
 import pymongo
-from listing import listing_retrieve, listing_parse, listing_save, _clean_permit_application_number
+from listing import \
+     listing_retrieve, listing_parse, listing_save, \
+    _clean_permit_application_number, \
+    _clean_mvn_permit_application_number
 
 class TestListingParse(unittest.TestCase):
     def setUp(self):
@@ -96,7 +99,7 @@ class TestListingSave(unittest.TestCase):
         listing_save(self.data, self.db)
         self.db.permit.find_one()
 
-class TestPermitApplicationNumberConversion(unittest.TestCase):
+class TestMVNPermitApplicationNumberConversion(unittest.TestCase):
     'Permit application numbers should get cleaned up, or I should see errors.'
 
     def _p(self, permit_application_number, should = None):
@@ -106,14 +109,14 @@ class TestPermitApplicationNumberConversion(unittest.TestCase):
             should = permit_application_number
 
         self.assertEqual(
-            _clean_permit_application_number(permit_application_number),
+            _clean_mvn_permit_application_number(permit_application_number),
             should
         )
 
     def _r(self, permit_application_number, raises = AssertionError):
         'Does the cleaning raise an error?'
         with self.assertRaises(raises):
-            _clean_permit_application_number(permit_application_number)
+            _clean_mvn_permit_application_number(permit_application_number)
 
     def test_clean_short(self):
         self._p("MVN-2012-00926")

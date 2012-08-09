@@ -223,10 +223,25 @@ PERMIT_APPLICATION_NUMBER_REGEX = re.compile(r'^MVN-[0-9]+-[0-9]+(?:-[A-Z]+)?$')
 PERMIT_YEAR = re.compile(r'[12][901][789012][0-9]')
 
 MANUAL_REPLACEMENTS = {
-    'MVN 2009-3063 CO (ERRATUM)': 'MVN-2009-3063-CO-(ERRATUM)'
+    'MVN 2009-3063 CO (ERRATUM)': 'MVN-2009-3063-CO-(ERRATUM)',
+    'MVN 2010-1080 WLL/ MVN 2010 1032 WLL B': 'MVN-2010-1080-WLL/MVN-2010-1032-WLLB',
+    'MVN-2010-1080-WLL/ MVN-2010-1032-WLL-A': 'MVN-2010-1080-WLL/MVN-2010-1032-WLL-A',
 }
 def _clean_permit_application_number(n):
     'Clean up the permit application number.'
+    if n[:3] == 'MVN':
+        return _clean_mvn_permit_application_number(n)
+    elif n[:3] == 'CEM':
+        return _clean_cem_permit_application_number(n)
+    else:
+        raise AssertionError('Unexpected first block in %s' % n)
+
+def _clean_cem_permit_application_number(n):
+    'Clean up the permit application number for CEM permits.'
+    return n
+
+def _clean_mvn_permit_application_number(n):
+    'Clean up the permit application number for MVN permits.'
 
     # If this is a manual one, replace it that way.
     if n in MANUAL_REPLACEMENTS:
