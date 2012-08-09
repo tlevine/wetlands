@@ -224,22 +224,22 @@ def _clean_permit_application_number(n):
     'Clean up the permit application number.'
 
 
-    # These characters should be delimeters and turned into hyphens.
-    delimeters = {3, 8}
+    # Remove delimiters
+    n = filter(lambda char: char not in '- ', n)
+
+    # Add hyphen delimeters
+    n = n[:3] + '-' + n[3:8] + '-' + n[8:]
 
     # If there's a fourth group
-    if re.match(r'[A-Z]{3}', n[-3:]):
-        delimeters.update({-4})
+    if re.match(r'[0-9][A-Z]{3}', n[-4:]):
 
-    # Standardize delimeters
-    _n = list(n)
-    for i in delimeters:
-        if _n[i] in ' -':
-            _n[i] = '-'
-        else:
-            p = (i, n[i])
-            raise AssertionError('Character %d (%s) is not a space or hyphen' % p)
-    n = ''.join(_n)
+        # Check that the third group is all letters
+        
+
+        # Add the delimiter
+        n = n[:-3] + '-' + n[-3:]
+    else:
+        ''
 
     if not re.match(PERMIT_APPLICATION_NUMBER_REGEX, n):
         raise AssertionError(
