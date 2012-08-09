@@ -219,9 +219,34 @@ def _RRRaise(exception):
     else:
         raise exception
 
-def _clean_permit_application_number(raw):
+PERMIT_APPLICATION_NUMBER_REGEX = r''
+def _clean_permit_application_number(n):
     'Clean up the permit application number.'
-    return raw
+
+
+    # These characters should be delimeters and turned into hyphens.
+    delimeters = {3, 8}
+
+    # If there's a fourth group
+    if re.match(r'[A-Z]{3}', n[-3:]):
+        delimeters.update({-4})
+
+    # Standardize delimeters
+    _n = list(n)
+    for i in delimeters:
+        if _n[i] in ' -':
+            _n[i] = '-'
+        else:
+            p = (i, n[i])
+            raise AssertionError('Character %d (%s) is not a space or hyphen' % p)
+    n = ''.join(_n)
+
+    if not re.match(PERMIT_APPLICATION_NUMBER_REGEX, n):
+        raise AssertionError(
+            'Permit application number %s could not be cleaned up.' % n
+        )
+
+    return n
 
 def _onenode(html, xpath):
     nodes = html.xpath(xpath)

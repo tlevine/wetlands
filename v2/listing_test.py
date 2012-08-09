@@ -110,7 +110,7 @@ class TestPermitApplicationNumberConversion(unittest.TestCase):
             should
         )
 
-    def _r(self, raises = AssertionError):
+    def _r(self, permit_application_number, raises = AssertionError):
         'Does the cleaning raise an error?'
         with self.assertRaises(raises):
             _clean_permit_application_number(permit_application_number)
