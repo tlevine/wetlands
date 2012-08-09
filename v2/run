@@ -20,6 +20,15 @@ while true
   permit=$(cat $tsv|cut -f1)
   url="http://www.mvn.usace.army.mil/ops/regulatory/$(cat $tsv|cut -f2)"
   papertype=$(cat $tsv|cut -f3)
+
+  # Ugh db properties
+  if [ "${papertype}" = public_notice ]
+    then
+    paperType=publicNotice
+  elif [ "${papertype}" = drawings ]
+  then
+    paperType=drawings
+  fi
   
   dir="pdfs/$permit"
 
@@ -28,13 +37,23 @@ while true
   echo '------------------------------------------------------------'
 
   # Has the file been downloaded? Download if not.
+  error_on_download=false
   file=$(paper \
     --permit "${permit}" \
     --url "${url}" \
-    --papertype "${papertype}") || already_downloaded=true
+    --papertype "${papertype}") || error_on_download=true
+
+  # If not the file is not there, it was the same as an earlier one,
+  # so we can go to the next file.
+  if [ ! -e "${file}" ] && [ error_on_download ]
+    then
+    mongo wetlands --eval "db.permit.update({_id:\"$permit\"},{\"\$set\": {$paperType:{processed: true}}})"
+    continue
+  fi
 
   # If the file has been downloaded, then it clearly hasn't been parsed fully
   # because get_unprocessed.py returns it; run the translator.
+  ocr_error=false
   ./translate "${file}" || ocr_error=true
 
   # Read the text and save it.
@@ -45,13 +64,6 @@ while true
     then
     echo OCR error>&2
     # Record OCR error
-    if [ "${papertype}" = public_notice ]
-      then
-      paperType=publicNotice
-    elif [ "${papertype}" = drawings ]
-    then
-      paperType=drawings
-    fi
     mongo wetlands --eval "db.permit.insert({_id:\"${permit}\",${paperType}:{ocrError:true}})"
   fi
 
@@ -60,4 +72,5 @@ while true
   echo \ 
   echo \ 
   echo \ 
+  sleep 2s
 done
