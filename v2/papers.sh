@@ -13,7 +13,7 @@ paper() {
           --permit) permit="$2" && shift;;
           --date) date="$2" && shift;;
           -*) echo >&2 $USAGE
-              exit 1;;
+              return 1;;
           *)  break;;
       esac
       shift
