@@ -35,7 +35,23 @@ while true
 
   # If the file has been downloaded, then it clearly hasn't been parsed fully
   # because get_unprocessed.py returns it; run the translator.
-  ./translate "${file}" || exit 1
+  ./translate "${file}" || ocr_error=true
+
+  if [ $ocr_error ]
+    then
+    echo OCR error>&2
+    # Record OCR error
+    if [ "${papertype}" = public_notice ]
+      then
+      paperType=publicNotice
+    elif [ "${papertype}" = drawings ]
+    then
+      paperType=drawings
+    fi
+    mongo wetlands --eval "db.permit.insert({_id:${permit},\"${paperType}.ocrError\":true})"
+  fi
+
+  exit 1
 
   # Read the text and save it.
   cat "${file}".txt | python2 read.py "${permit}" "${papertype}"
