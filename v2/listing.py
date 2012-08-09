@@ -224,8 +224,8 @@ PERMIT_YEAR = re.compile(r'[12][901][789012][0-9]')
 
 MANUAL_REPLACEMENTS = {
     'MVN 2009-3063 CO (ERRATUM)': 'MVN-2009-3063-CO-(ERRATUM)',
-    'MVN 2010-1080 WLL/ MVN 2010 1032 WLL B': 'MVN-2010-1080-WLL/MVN-2010-1032-WLLB',
-    'MVN-2010-1080-WLL/ MVN-2010-1032-WLL-A': 'MVN-2010-1080-WLL/MVN-2010-1032-WLL-A',
+    'MVN 2010-1080 WLL/ MVN 2010 1032 WLL B': 'MVN-2010-1080-WLL_MVN-2010-1032-WLLB',
+    'MVN-2010-1080-WLL/ MVN-2010-1032-WLL-A': 'MVN-2010-1080-WLL_MVN-2010-1032-WLL-A',
 }
 def _clean_permit_application_number(n):
     'Clean up the permit application number.'
@@ -238,7 +238,8 @@ def _clean_permit_application_number(n):
 
 def _clean_cem_permit_application_number(n):
     'Clean up the permit application number for CEM permits.'
-    assert ' ' not in n, n
+    for c in '/ \\':
+        assert c not in n, n
     return n
 
 def _clean_mvn_permit_application_number(n):
