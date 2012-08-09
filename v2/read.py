@@ -3,8 +3,34 @@ import re
 
 def main():
     import sys
-    data = read_public_notice(sys.stdin.read())
-    print data
+    # Read input
+    permit, papertype = sys.argv[1:]
+    text = sys.stdin.read()
+
+    # Parse
+    doc = read_public_notice(text)
+    doc['_id'] = permit
+    doc['permitApplicationNumber'] = permit
+    doc['CUP'] = list(doc['CUP'])
+
+    # Connect to database
+    import pymongo
+    connection = pymongo.Connection('localhost')
+    db = connection.wetlands
+
+    # Choose the collection
+    if papertype == 'public_notice':
+        collection = db.public_notice
+    elif papertype == 'drawings':
+        collection = db.drawings
+    else:
+        raise ValueError(
+            'Paper type must be one of "public_notice" or "drawings"; ' +
+            papertype + ' is not allowed.'
+        )
+
+    # Save
+    collection.insert(doc)
 
 def read_public_notice(rawtext):
     "Get everything from the notice."
