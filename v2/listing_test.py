@@ -140,7 +140,7 @@ class TestPermitApplicationNumberConversion(unittest.TestCase):
         self._p("MVN-2006-0335-CY A", should = "MVN-2006-0335-CYA")
 
     def test_bad_first_block_long(self):
-        self._p("ABC-2012-01027-WMM")
+        self._r("ABC-2012-01027-WMM")
 
     def test_strange_year_second_block(self):
         self._r("MVN-1987-01027-WMM")

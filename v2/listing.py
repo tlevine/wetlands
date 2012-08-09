@@ -219,7 +219,8 @@ def _RRRaise(exception):
     else:
         raise exception
 
-PERMIT_APPLICATION_NUMBER_REGEX = r''
+PERMIT_APPLICATION_NUMBER_REGEX = re.compile(r'^MVN-[0-9]+-[0-9]+(?:-[A-Z]+)?')
+PERMIT_YEAR = re.compile(r'2[01][012][0-9]')
 def _clean_permit_application_number(n):
     'Clean up the permit application number.'
 
@@ -233,14 +234,24 @@ def _clean_permit_application_number(n):
     # If there's a fourth group
     if re.match(r'[0-9][A-Z]{3}', n[-4:]):
 
-        # Check that the third group is all letters
-        
+        if not re.match(r'.+-[0-9]+[A-Z]{3}$', n):
+            raise AssertionError('The third group of %s is not all numbers.' % n)
 
         # Add the delimiter
         n = n[:-3] + '-' + n[-3:]
     else:
-        ''
+        if not re.match(r'.+-[0-9]+$', n):
+            raise AssertionError('The third group of %s is not all numbers.' % n)
 
+    # Check year
+    if 'MVN' != n[:3]:
+        raise AssertionError('The first three letters of %s are not "MVN"' % n)
+
+    # Check year
+    if not re.match(PERMIT_YEAR, n[4:8]):
+        raise AssertionError('The second group of %s doesn\'t seem like a year.' % n)
+
+    # Final check
     if not re.match(PERMIT_APPLICATION_NUMBER_REGEX, n):
         raise AssertionError(
             'Permit application number %s could not be cleaned up.' % n
