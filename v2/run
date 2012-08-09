@@ -10,19 +10,33 @@ tsv=$(mktemp)
 while true
   do
   # Save unprocessed pdf files, and stop when finished
-  python2 get_unprocessed.py tsv | sed 1d > $tsv 
+  python2 get_unprocessed.py tsv | sed 1d > $tsv
 
   permit=$(cat $tsv|cut -f1)
   url="http://www.mvn.usace.army.mil/ops/regulatory/$(cat $tsv|cut -f2)"
   papertype=$(cat $tsv|cut -f3)
   
   dir="pdfs/$permit"
+
+  echo '----------------------------------------'
+  echo Working on the "${permit} ${papertype}"
+  echo '----------------------------------------'
+
+  # Has the file been downloaded? Download if not.
   file=$(paper \
     --permit "${permit}" \
     --url "${url}" \
-    --papertype "${papertype}")
+    --papertype "${papertype}") || already_downloaded=true
 
-  ./translate "${file}"
+  # If the file has been downloaded, then it clearly hasn't been parsed fully
+  # because get_unprocessed.py returns it; run the translator.
+  ./translate "${file}" || exit 1
 
   cat "${file}".txt | python2 read.py "${permit}" "${papertype}"
+
+  echo \ 
+  echo '----------------------------------------'
+  echo \ 
+  echo \ 
+  echo \ 
 done

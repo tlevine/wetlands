@@ -26,6 +26,11 @@ paper() {
   # Don't download the file if I've already downloaded it today.
   if [ -e "$file" ]
     then
+
+    # Return the file name
+    echo $file
+
+    # Report error
     echo The file was already downloaded today. >&2
     return 1
   fi
