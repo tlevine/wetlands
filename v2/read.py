@@ -11,15 +11,15 @@ def main():
     doc = read_public_notice(text)
     doc['_id'] = permit
     doc['permitApplicationNumber'] = permit
-    doc['CUP'] = list(doc['CUP'])
 
     # Connect to database
     import pymongo
     connection = pymongo.Connection('localhost')
     db = connection.wetlands
 
-    # Choose the collection
+    # Things based on paper type the collection
     if papertype == 'public_notice':
+        doc['CUP'] = list(doc['CUP'])
         collection = db.public_notice
     elif papertype == 'drawings':
         collection = db.drawings
