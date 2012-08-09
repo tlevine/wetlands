@@ -219,11 +219,18 @@ def _RRRaise(exception):
     else:
         raise exception
 
-PERMIT_APPLICATION_NUMBER_REGEX = re.compile(r'^MVN-[0-9]+-[0-9]+(?:-[A-Z]+)?')
-PERMIT_YEAR = re.compile(r'2[01][012][0-9]')
+PERMIT_APPLICATION_NUMBER_REGEX = re.compile(r'^MVN-[0-9]+-[0-9]+(?:-[A-Z]+)?$')
+PERMIT_YEAR = re.compile(r'[12][901][789012][0-9]')
+
+MANUAL_REPLACEMENTS = {
+    'MVN 2009-3063 CO (ERRATUM)': 'MVN-2009-3063-CO-(ERRATUM)'
+}
 def _clean_permit_application_number(n):
     'Clean up the permit application number.'
 
+    # If this is a manual one, replace it that way.
+    if n in MANUAL_REPLACEMENTS:
+        return MANUAL_REPLACEMENTS[n]
 
     # Remove delimiters
     n = filter(lambda char: char not in '- ', n)
@@ -232,13 +239,9 @@ def _clean_permit_application_number(n):
     n = n[:3] + '-' + n[3:7] + '-' + n[7:]
 
     # If there's a fourth group
-    if re.match(r'[0-9][A-Z]{3}', n[-4:]):
-
-        if not re.match(r'.+-[0-9]+[A-Z]{3}$', n):
-            raise AssertionError('The third group of %s is not all numbers.' % n)
-
+    if re.match(r'.+[0-9][A-Z]+$', n):
         # Add the delimiter
-        n = n[:-3] + '-' + n[-3:]
+        n = re.sub(r'(.+[0-9])([A-Z]+)$', r'\1-\2', n)
     else:
         if not re.match(r'.+-[0-9]+$', n):
             raise AssertionError('The third group of %s is not all numbers.' % n)

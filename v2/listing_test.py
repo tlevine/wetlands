@@ -142,17 +142,23 @@ class TestPermitApplicationNumberConversion(unittest.TestCase):
     def test_bad_first_block_long(self):
         self._r("ABC-2012-01027-WMM")
 
+    def test_old_year_second_block(self):
+        self._p("MVN-1987-01027-WMM")
+
     def test_strange_year_second_block(self):
-        self._r("MVN-1987-01027-WMM")
+        self._r("MVN-1887-01027-WMM")
 
     def test_nonletters_in_fourth_block(self):
         self._r("MVN-2012-01027-W3M")
 
     def test_fourth_block_length(self):
-        self._r("MVN-2012-0000-ABCD")
+        self._p("MVN-2012-0000-ABCD")
 
     def test_second_block_length(self):
         self._r("MVN-02012-0000-ABC")
+
+    def test_short_fourth_block(self):
+        self._p('MVN-2012-01053-CJ')
 
 if __name__ == "__main__":
     unittest.main()
