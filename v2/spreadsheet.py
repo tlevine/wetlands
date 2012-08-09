@@ -81,7 +81,7 @@ for permit in db.permit.find():
 i = open('index.html', 'w')
 i.write('<h1>Army Corps 404 Website Scraper Output</h1>')
 i.write(
-    '<p>The most recent spreadsheet is <a href="%s">here</a>,'
+    '<p>The most recent spreadsheet is <a href="%s">here</a>, '
     'and the pdf files are <a href="pdfs">here</a>.</p>' % spreadsheetname
 )
 i.write('<p>Read more <a href="https://github.com/tlevine/wetlands">here</a>.</p>')
