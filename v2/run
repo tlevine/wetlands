@@ -37,6 +37,7 @@ while true
   # because get_unprocessed.py returns it; run the translator.
   ./translate "${file}" || ocr_error=true
 
+  # If the OCR raised an error, remember that.
   if [ $ocr_error ]
     then
     echo OCR error>&2
@@ -48,10 +49,8 @@ while true
     then
       paperType=drawings
     fi
-    mongo wetlands --eval "db.permit.insert({_id:${permit},\"${paperType}.ocrError\":true})"
+    mongo wetlands --eval "db.permit.insert({_id:\"${permit}\",${paperType}:{ocrError:true}})"
   fi
-
-  exit 1
 
   # Read the text and save it.
   cat "${file}".txt | python2 read.py "${permit}" "${papertype}"

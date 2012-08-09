@@ -22,7 +22,17 @@ for extension in pbm ppm
     [ -e $file ] || continue
 
     echo $file
-    tesseract "$file" "$file"
-    cat "$file.txt" >> "$FILE.txt"
+
+    # Raise OCR errors at the end; try other files if one fails.
+    tesseract "$file" "$file" &&
+      cat "$file.txt" >> "$FILE.txt" ||
+      ocr_error=true
+
   done
 done
+
+# Raise OCR errors at the end.
+if [ ocr_error ]
+  then
+  exit 1
+fi
