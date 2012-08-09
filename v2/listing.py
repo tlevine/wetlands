@@ -238,6 +238,7 @@ def _clean_permit_application_number(n):
 
 def _clean_cem_permit_application_number(n):
     'Clean up the permit application number for CEM permits.'
+    assert ' ' not in n, n
     return n
 
 def _clean_mvn_permit_application_number(n):
