@@ -74,3 +74,9 @@ while true
   echo \ 
   sleep 2s
 done
+
+# Generate a new spreadsheet
+python2 spreadsheet.py
+
+echo 'You need to restart the http server to refresh the index.html page;'
+echo 'Run `http-server -p 1419` from this directory.'

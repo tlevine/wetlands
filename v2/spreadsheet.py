@@ -1,5 +1,5 @@
+import datetime
 import csv
-
 import pymongo
 connection = pymongo.Connection('localhost')
 db = connection.wetlands
@@ -8,7 +8,8 @@ WEB_DIR=u'www.mvn.usace.army.mil/ops/regulatory/'
 # PUBLIC_NOTICE=u'http://wetlands.thomaslevine.com/pdfs/%s/public_notice.pdf'
 PUBLIC_NOTICE=u'http://chainsaw.chickenkiller.com:1419/pdfs/%s/public_notice.pdf'
 
-f = open('wetlands.csv', 'w')
+spreadsheetname = datetime.date.today().isoformat() + '.csv'
+f = open(spreadsheetname, 'w')
 fieldnames = [
     "Permit Application No.",
 
@@ -76,3 +77,11 @@ for permit in db.permit.find():
     del(permit)
     del(public_notice)
 
+
+i = open('index.html', 'w')
+i.write('<h1>Army Corps 404 Website Scraper Output</h1>')
+i.write(
+    '<p>The most recent spreadsheet is <a href="%s">here</a>,'
+    'and the pdf files are <a href="pdfs">here</a>.</p>' % spreadsheetname
+)
+i.write('<p>Read more <a href="https://github.com/tlevine/wetlands">here</a>.</p>')
