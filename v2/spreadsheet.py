@@ -1,3 +1,5 @@
+import csv
+
 import pymongo
 connection = pymongo.Connection('localhost')
 db = connection.wetlands
@@ -5,9 +7,43 @@ db = connection.wetlands
 WEB_DIR=u'www.mvn.usace.army.mil/ops/regulatory/'
 PUBLIC_NOTICE=u'http://wetlands.thomaslevine.com/pdfs/%s/public_notice.pdf'
 
+f = open('wetlands.csv', 'w')
+fieldnames = [
+    "Permit Application No.",
+
+    # Information from the listings page
+    "Applicant",
+#   "Drawings URL",
+    "Expiration Date",
+    "Location",
+    "Project Description",
+    "Project Manager Phone",
+    "Project Manager Email",
+    "Project Manager Name",
+    "Public Notice Date",
+#   "Public Notice URL",
+    "Public Notice URL",
+
+    # Information from the public notice
+    "Total Acres",
+    "CUP",
+    "WQC",
+#   "Coordinates",
+
+    # Whether particular terms are in the public notice
+    "Says 'Section 10'",
+    "Says 'Section 404'",
+    "Says 'Drill'",
+    "Says 'Road'",
+    "Says 'Mitigation Bank'",
+]
+c = csv.DictWriter(f, fieldnames)
+c.writeheader()
+
 for permit in db.permit.find():
-    public_notice = db.public_notice.find_one(_id=permit['_id'])
-    row = {
+    public_notice = db.public_notice.find_one({'_id': permit['_id']})
+    # assert permit['_id'] == public_notice['_id']
+    c.writerow({
         "Permit Application No.": permit['_id'],
 
         # Information from the listings page
@@ -24,16 +60,18 @@ for permit in db.permit.find():
         "Public Notice URL": PUBLIC_NOTICE % permit['_id'],
 
         # Information from the public notice
-        "Total Acres": sum(permit.get('Acres', [])),
-        "CUP": ','.join(permit.get('CUP', [])),
-        "WQC": permit.get('WQC', ''),
+        "Total Acres": sum(public_notice['Acres']),
+        "CUP": ','.join(public_notice['CUP']),
+        "WQC": public_notice['WQC'],
 #       "Coordinates": 
 
         # Whether particular terms are in the public notice
-        "Says 'Section 10'": permit.get('Section 10', False),
-        "Says 'Section 404'": permit.get('Section 404', False),
-        "Says 'Drill'": permit.get('Drill', False),
-        "Says 'Road'": permit.get('Road', False),
-        "Says 'Mitigation Bank'": permit.get('Mitigation Bank', False),
-    }
-    print row
+        "Says 'Section 10'": public_notice['Section 10'],
+        "Says 'Section 404'": public_notice['Section 404'],
+        "Says 'Drill'": public_notice['Drill'],
+        "Says 'Road'": public_notice['Road'],
+        "Says 'Mitigation Bank'": public_notice['Mitigation Bank'],
+    })
+    del(permit)
+    del(public_notice)
+
