@@ -134,7 +134,7 @@ class TestPermitApplicationNumberConversion(unittest.TestCase):
         self._p("MVN 2010-1270 WII", should = "MVN-2010-1270-WII")
 
     def test_weirdspace_space1_long(self):
-        self._p("MVN 2006-0335-CY A", should = "MVN 2006-0335-CYA")
+        self._p("MVN 2006-0335-CY A", should = "MVN-2006-0335-CYA")
 
     def test_weirdspace_long(self):
         self._p("MVN-2006-0335-CY A", should = "MVN-2006-0335-CYA")
