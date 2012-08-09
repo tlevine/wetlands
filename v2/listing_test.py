@@ -3,7 +3,7 @@ import unittest
 import datetime
 import json
 import pymongo
-from listing import listing_retrieve, listing_parse, listing_save
+from listing import listing_retrieve, listing_parse, listing_save, _clean_permit_application_number
 
 class TestListingParse(unittest.TestCase):
     def setUp(self):
@@ -95,6 +95,64 @@ class TestListingSave(unittest.TestCase):
         os.system('mongorestore -d wetlands_test fixtures/listing_dump/wetlands_test')
         listing_save(self.data, self.db)
         self.db.permit.find_one()
+
+class TestPermitApplicationNumberConversion(unittest.TestCase):
+    'Permit application numbers should get cleaned up, or I should see errors.'
+
+    def _p(self, permit_application_number, should = None):
+        'Does the cleaning happen properly?'
+
+        if should == None:
+            should = permit_application_number
+
+        self.assertEqual(
+            _clean_permit_application_number(permit_application_number),
+            should
+        )
+
+    def _r(self, raises = AssertionError):
+        'Does the cleaning raise an error?'
+        with self.assertRaises(raises):
+            _clean_permit_application_number(permit_application_number)
+
+    def test_clean_short(self):
+        self._p("MVN-2012-00926")
+
+    def test_clean_long(self):
+        self._p("MVN-2012-01027-WMM")
+
+    def test_space1_long(self):
+        self._p("MVN 2010-1270-WII", should = "MVN-2010-1270-WII")
+
+    def test_space2_long(self):
+        self._p("MVN-2010 1270-WII", should = "MVN-2010-1270-WII")
+
+    def test_space3_long(self):
+        self._p("MVN-2010-1270 WII", should = "MVN-2010-1270-WII")
+
+    def test_space1_space3_long(self):
+        self._p("MVN 2010-1270 WII", should = "MVN-2010-1270-WII")
+
+    def test_weirdspace_space1_long(self):
+        self._p("MVN 2006-0335-CY A", should = "MVN 2006-0335-CYA")
+
+    def test_weirdspace_long(self):
+        self._p("MVN-2006-0335-CY A", should = "MVN-2006-0335-CYA")
+
+    def test_bad_first_block_long(self):
+        self._p("ABC-2012-01027-WMM")
+
+    def test_strange_year_second_block(self):
+        self._r("MVN-1987-01027-WMM")
+
+    def test_nonletters_in_fourth_block(self):
+        self._r("MVN-2012-01027-W3M")
+
+    def test_fourth_block_length(self):
+        self._r("MVN-2012-0000-ABCD")
+
+    def test_second_block_length(self):
+        self._r("MVN-02012-0000-ABC")
 
 if __name__ == "__main__":
     unittest.main()

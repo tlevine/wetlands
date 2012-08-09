@@ -53,6 +53,9 @@ def listing_parse(rawtext):
         # As a dict
         row = dict(zip(thead, [td.text_content().strip() for td in tr.xpath('td')]))
 
+        # Clean up the permit application number
+        row['PermitApplication No.'] = _clean_permit_application_number(row['PermitApplication No.'])
+
         # Dates
         row['Public Notice Date'] = _parsedate(row['Public Notice Date'])
         row['Expiration Date'] = _parsedate(row['Expiration Date'])
@@ -216,6 +219,9 @@ def _RRRaise(exception):
     else:
         raise exception
 
+def _clean_permit_application_number(raw):
+    'Clean up the permit application number.'
+    return raw
 
 def _onenode(html, xpath):
     nodes = html.xpath(xpath)
