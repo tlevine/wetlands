@@ -5,7 +5,8 @@ connection = pymongo.Connection('localhost')
 db = connection.wetlands
 
 WEB_DIR=u'www.mvn.usace.army.mil/ops/regulatory/'
-PUBLIC_NOTICE=u'http://wetlands.thomaslevine.com/pdfs/%s/public_notice.pdf'
+# PUBLIC_NOTICE=u'http://wetlands.thomaslevine.com/pdfs/%s/public_notice.pdf'
+PUBLIC_NOTICE=u'http://chainsaw.chickenkiller.com:1419/pdfs/%s/public_notice.pdf'
 
 f = open('wetlands.csv', 'w')
 fieldnames = [
