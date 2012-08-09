@@ -240,7 +240,7 @@ def _clean_cem_permit_application_number(n):
     'Clean up the permit application number for CEM permits.'
     for c in '/ \\':
         assert c not in n, n
-    assert n.lower() == n
+    assert n.upper() == n
     return n
 
 def _clean_mvn_permit_application_number(n):
