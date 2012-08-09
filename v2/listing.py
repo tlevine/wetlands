@@ -228,7 +228,7 @@ def _clean_permit_application_number(n):
     n = filter(lambda char: char not in '- ', n)
 
     # Add hyphen delimeters
-    n = n[:3] + '-' + n[3:8] + '-' + n[8:]
+    n = n[:3] + '-' + n[3:7] + '-' + n[7:]
 
     # If there's a fourth group
     if re.match(r'[0-9][A-Z]{3}', n[-4:]):
