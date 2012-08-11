@@ -13,6 +13,10 @@ fi
 tsv=$(mktemp)
 while true
   do
+
+  # Be polite.
+  sleep 2s
+
   # Save unprocessed pdf files, and stop when finished
   tsvtext="$(python2 get_unprocessed.py tsv)"
   echo "${tsvtext}" | sed 1d > $tsv
@@ -72,7 +76,6 @@ while true
   echo \ 
   echo \ 
   echo \ 
-  sleep 2s
 done
 
 # Generate a new spreadsheet
