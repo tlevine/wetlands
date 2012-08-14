@@ -1,3 +1,6 @@
 [submodule "v2/listings"]
 	path = v2/listings
 	url = git@github.com:tlevine/wetlands-listings.git
+[submodule "v2/web"]
+	path = v2/web
+	url = git@github.com:tlevine/wetlands-v2-web.git
