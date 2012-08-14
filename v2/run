@@ -4,11 +4,8 @@ set -e
 . ./papers.sh
 set -e
 
-if [ "$1" != nodownload ]
-  then
-  # Save the listing page.
-  python2 listing.py
-fi
+# Save the listing page.
+python2 listing.py
 
 tsv=$(mktemp)
 while true
