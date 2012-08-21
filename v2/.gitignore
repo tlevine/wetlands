@@ -1,3 +1,10 @@
 readme.aux
 readme.log
 readme.pdf
+
+# Website
+*.csv
+index.html
+
+# Shell test executable
+urchin
