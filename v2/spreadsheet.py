@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import datetime
 import csv
 import pymongo
@@ -79,9 +80,11 @@ for permit in db.permit.find():
 
 
 i = open('index.html', 'w')
+armypage = 'http://www.mvn.usace.army.mil/ops/regulatory/publicnotices.asp?ShowLocationOrder=False'
 i.write('<h1>Army Corps 404 Website Scraper Output</h1>')
 i.write(
     '<p>The most recent spreadsheet is <a href="%s">here</a>, '
-    'and the pdf files are <a href="pdfs">here</a>.</p>' % spreadsheetname
+    'and the pdf files are <a href="pdfs">here</a>. '
+    'They came from <a href="%s">here</a>.</p>' % (spreadsheetname, armypage)
 )
 i.write('<p>Read more <a href="https://github.com/tlevine/wetlands">here</a>.</p>')
