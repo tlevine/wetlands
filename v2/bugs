@@ -1,0 +1,9 @@
+Bugs in this script
+---
+The "scriptRuns" list is always replaced; new dates are not simply added to it.
+
+
+Bugs in the source data
+---
+It looks like MVN-2008-03033 was posted for a few days and then removed before
+falling off the bottom of the page.
