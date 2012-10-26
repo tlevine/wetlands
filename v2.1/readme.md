@@ -56,3 +56,20 @@ just check out the git repository to a web server, setting the root of the
 website to the git repository's working directory.
 
 ### Editing the website
+
+## Tests
+Tests are written in nose and urchin. Run tests like so.
+
+    . activate
+    
+    # All tests
+    tests
+    
+    # All urchin tests
+    urchin
+    
+    # All nose tests
+    nosetests
+
+If you add any arguments to the `urchin` or `nosetests` commands, they will
+work like normal; do this if you want to run just a section of the test suite.
