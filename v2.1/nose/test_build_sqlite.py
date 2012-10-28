@@ -1,3 +1,4 @@
+import os
 import nose.tools as n
 
 import build
