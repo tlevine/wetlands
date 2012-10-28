@@ -3,12 +3,19 @@ import nose.tools as n
 
 import build
 
-class ParseOneEmptyOneNotThere:
+class CheckSqlite:
+    def test_existance(self):
+        'The fat.db file should be there.'
+        n.assert_true(os.path.exists(os.path.join(self.data_dir, 'fat.db')))
+
+class TestParseOneEmptyOneNotThere(CheckSqlite):
     'Parse given one empty directory and one that doesn\'t exist.'
     @classmethod
     def setup_class(self):
         for subdir in ['listings', 'data']:
-            os.mkdir('/tmp/wetlands_test_build-' + subdir)
+            new = '/tmp/wetlands_test_build-' + subdir
+            if not os.path.exists(new):
+                os.mkdir(new)
         self.listings_dir = '/tmp/wetlands_test_build-listings'
         self.pdfs_dir = '/tmp/wetlands_test_build-pdfs'
         self.data_dir = '/tmp/wetlands_test_build-data'
