@@ -1,1 +1,31 @@
-PATH="$PWD/bin:$PATH"
+# Run this from the root directory of the v2.1 project so we know this:
+export WETLANDS_ROOT="$PWD"
+
+# Set path.
+OLD_PATH=$PATH
+OLD_PYTHONPATH=$PYTHONPATH
+PATH="$WETLANDS_ROOT/bin:$PATH"
+
+# Add code directory to PYTHONPATH, adding a separating ':' if PYTHONPATH is already set.
+# See http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_06_02
+export PYTHONPATH="${WETLANDS_ROOT}/src${PYTHONPATH+:}${PYTHONPATH}"
+
+# Indicate that we've activated.
+OLD_PS1=$PS1
+PS1="[wetlands]$PS1"
+
+# Run nosetests in the appropriate directory.
+nosetests() {
+  (
+    cd "$WETLANDS_ROOT/nose"
+    env nosetests $@
+  ) || return 1
+}
+
+deactivate () {
+  export PATH=$OLD_PATH
+  PS1=$OLD_PS1
+  export PYTHONPATH=$OLD_PYTHONPATH
+  unalias boxsh
+  unset -f deactivate
+}
