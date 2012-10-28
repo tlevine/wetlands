@@ -17,7 +17,7 @@ PS1="[wetlands]$PS1"
 # Run nosetests in the appropriate directory.
 nosetests() {
   (
-    cd "$WETLANDS_ROOT/nose"
+    builtin cd "$WETLANDS_ROOT/nose"
     env nosetests $@
   ) || return 1
 }
@@ -26,6 +26,5 @@ deactivate () {
   export PATH=$OLD_PATH
   PS1=$OLD_PS1
   export PYTHONPATH=$OLD_PYTHONPATH
-  unalias boxsh
   unset -f deactivate
 }
