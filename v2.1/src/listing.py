@@ -2,7 +2,13 @@ import datetime
 import lxml.html, lxml.etree
 import re
 from unidecode import unidecode
-from urllib2 import urlopen
+
+# Python 3 compatibility
+try:
+    from urllib2 import urlopen
+except ImportError:
+    from urllib.request import urlopen
+
 
 def listing_parse(rawtext):
     # There are more data in the comments!
@@ -49,7 +55,7 @@ def listing_parse(rawtext):
             _log(pdfkeys)
             _RRRaise(AssertionError('The table row has unexpected hyperlinks.'))
         if len(pdfkeys) == 0:
-            print row
+            print(row)
             _RRRaise(AssertionError('No pdf hyperlinks found for permit %s.' % row['PermitApplication No.']))
         for key in ['Public Notice', 'Drawings']:
             try:
