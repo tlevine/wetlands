@@ -203,5 +203,12 @@ def _onenode(html, xpath):
     else:
         return nodes[0]
 
+def _extract_parish(location):
+    'Extract the parish name if it\'s a parish. Otherwise, return None.'
+    if re.match(r'.+ Parish$', location):
+        return re.sub(r' Parish$', '', location)
+    else:
+        return None
+
 if __name__ == '__main__':
     main()
