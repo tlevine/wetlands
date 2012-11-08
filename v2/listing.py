@@ -30,7 +30,7 @@ def listing_parse(rawtext):
     table = _onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"]')
     trs = table.xpath('tr')
 
-    # Getting the cells 
+    # Getting the cells
     thead = [td.text_content().strip() for td in trs.pop(0)]
     if len(thead) != _NCOL:
         _log(thead)
@@ -67,7 +67,7 @@ def listing_parse(rawtext):
             _log(pdfkeys)
             _RRRaise(AssertionError('The table row has unexpected hyperlinks.'))
         if len(pdfkeys) == 0:
-            print row
+            print(row)
             _RRRaise(AssertionError('No pdf hyperlinks found for permit %s.' % row['PermitApplication No.']))
         for key in ['Public Notice', 'Drawings']:
             try:
@@ -98,7 +98,7 @@ def listing_parse(rawtext):
             msg = 'This is a strange email link: <%s>' % row['Project Manager Email']
             _RRRaise(AssertionError(msg))
 
-        # Name 
+        # Name
         row['Project Manager Name'] = _onenode(pm, 'descendant::a').text_content().strip()
 
         # Phone number
@@ -127,14 +127,14 @@ def listing_save(data, db):
     data_new = [{
         '_id': doc['permitApplicationNumber'],
         'scriptRuns': [],
- 
+
         'location': doc['location'],
         'projectDescription': doc['projectDescription'],
         'applicant': doc['applicant'],
         'publicNoticeDate': doc['publicNoticeDate'],
         'expirationDate': doc['expirationDate'],
         'permitApplicationNumber': doc['permitApplicationNumber'],
- 
+
         'publicNotice': {
             'url': doc['publicNoticeUrl'],
             'data': {},
@@ -143,7 +143,7 @@ def listing_save(data, db):
             'url': doc['drawingsUrl'],
             'data': {},
         },
- 
+
         'projectManager': {
             'email': doc['projectManagerEmail'],
             'name': doc['projectManagerName'],
@@ -155,8 +155,8 @@ def listing_save(data, db):
 
     for doc_new in data_new:
         # If the permitApplicationNumber doesn't exist
-        db.permit.update({"_id": doc_new['_id']}, doc_new, upsert = True) 
- 
+        db.permit.update({"_id": doc_new['_id']}, doc_new, upsert = True)
+
         # Even if it was already there, set it as unprocessed so we know to
         # process it.
         db.permit.update(
@@ -205,17 +205,17 @@ QUIET = False
 
 def _log(foo):
     if QUIET == False:
-        print foo
+        print(foo)
 
 def _RRRaise(exception):
     raise exception
     if QUIET:
-        print {
+        print({
             'exception': str(type(exception)),
             'message': str(exception),
             'datetime': datetime.datetime.now(),
             'scraper_run': scraper_run
-        }
+        })
     else:
         raise exception
 
