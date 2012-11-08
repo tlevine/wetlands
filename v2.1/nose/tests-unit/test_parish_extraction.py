@@ -7,7 +7,7 @@ from listing import _extract_parish
 def _(location, parish):
     'The location should become the parish.'
     observed_parish = _extract_parish(location)
-    assert_string_equal(observed_parish, parish)
+    assert_equal(observed_parish, parish)
 
 def test_MVN_1998_04602_CQ():
     _('St. Helena Parish', 'St. Helena')
