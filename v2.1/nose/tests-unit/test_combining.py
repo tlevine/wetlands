@@ -23,9 +23,9 @@ class TestExtend:
         n.assert_equal(observed_rowcount, expected__rowcount)
 
     def _diff(self, test_name, expected_rowcount):
-        self._load_fixture_sql(test_name + '.sql')
+        self._load_fixture_sql('fixtures/' + test_name + '.sql')
         dt = DumpTruck(dbname = self.dbfile)
-        newdata = json.loads(open(test_name + '.json').read())
+        newdata = json.loads(open('fixtures/' + test_name + '.json').read())
         dt.upsert(newdata)
         self._rowcount_should_be(expected_rowcount)
 
@@ -35,12 +35,12 @@ class TestExtend:
 
     def test_subset(self):
         'When the new data are a subset of the old data, no rows should be added.'
-        self._diff('test_same', 164)
+        self._diff('test_subset', 164)
 
     def test_intersection(self):
         'When the new data contain some new rows and some old rows, new rows should be added.'
-        self._diff('test_same', 168)
+        self._diff('test_intersection', 168)
 
     def test_disjoint(self):
         'When the new data contain no old rows, new rows should be added.'
-        self._diff('test_same', 208)
+        self._diff('test_disjoint', 208)
