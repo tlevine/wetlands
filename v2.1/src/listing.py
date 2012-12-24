@@ -217,7 +217,7 @@ def _extract_parish(location):
     else:
         return None
 
-def main():
+def build():
     import os
     import dumptruck
 #   dbname = os.path.join(os.environ['WETLANDS_ROOT'], 'wetlands.db')
@@ -229,6 +229,3 @@ def main():
         data = listing_parse(f.read())
         f.close()
         dt.upsert(data)
-
-if __name__ == '__main__':
-    main()
