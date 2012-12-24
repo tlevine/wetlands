@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 import datetime
 import lxml.html, lxml.etree
 import re
@@ -215,6 +216,19 @@ def _extract_parish(location):
         return re.sub(r' Parish$', '', location)
     else:
         return None
+
+def main():
+    import os
+    import dumptruck
+#   dbname = os.path.join(os.environ['WETLANDS_ROOT'], 'wetlands.db')
+    dbname = '/tmp/wetlands.db'
+    dt = dumptruck.DumpTruck(dbname = dbname)
+    listings_dir = os.path.join(os.environ['WETLANDS_ROOT'], 'listings')
+    for listing in os.listdir(listings_dir):
+        f = open(os.path.join(listings_dir, listing))
+        data = listing_parse(f.read())
+        f.close()
+        dt.upsert(data)
 
 if __name__ == '__main__':
     main()
