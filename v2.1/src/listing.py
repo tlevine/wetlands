@@ -16,7 +16,12 @@ def listing_parse(rawtext):
     text_with_locations = rawtext.replace('<!--', '').replace('-->', '').replace('&nbsp;', ' ')
     unicodetext = unidecode(text_with_locations)
     html = lxml.html.fromstring(unicodetext)
-    table = _onenode(html, '//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"]')
+    nodes = html.xpath('//table[@width="570" and @border="1" and @cellpadding="0" and @cellspacing="0" and @bordercolor="#ffffff" and @bgcolor="#efefef"]')
+    if len(nodes) == 1:
+        table = nodes[0]
+    else:
+        print nodes
+        raise AssertionError('Not exactly one table')
     trs = table.xpath('tr')
 
     # Getting the cells
@@ -59,13 +64,14 @@ def listing_parse(rawtext):
             print(row)
             _RRRaise(AssertionError('No pdf hyperlinks found for permit %s.' % row['PermitApplication No.']))
         for key in ['Public Notice', 'Drawings']:
-            try:
-                row[key] = _onenode(tr, 'td/descendant::a[text()="%s"]/@href' % key)
-            except AssertionError:
-                if key == 'Public Notice':
-                    raise
-                else:
-                    continue
+            nodes = tr.xpath('td/descendant::a[text()="%s"]/@href' % key)
+            if len(nodes) == 0:
+                continue
+            elif len(nodes) == 1:
+                row[key] = nodes[0]
+            else:
+                print row
+                raise AssertionError('More than one %s node' % key)
 
             if row[key][:4] != 'pdf/':
                 _RRRaise(AssertionError('The %s pdf link doesn\'t have the expected path.' % key))
@@ -225,7 +231,10 @@ def build():
     dt = dumptruck.DumpTruck(dbname = dbname)
     listings_dir = os.path.join(os.environ['WETLANDS_ROOT'], 'listings')
     for listing in os.listdir(listings_dir):
+        if 'html' not in listing:
+            continue
         f = open(os.path.join(listings_dir, listing))
+        print listing
         data = listing_parse(f.read())
         f.close()
-        dt.upsert(data)
+        dt.upsert(data, 'application')
