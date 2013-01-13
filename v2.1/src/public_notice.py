@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 import re
+import json
 import dumptruck
 
 def main():
@@ -12,6 +13,11 @@ def main():
     doc = read_public_notice(text)
     doc['permitApplicationNumber'] = permit
     doc['pdfParsed'] = 1
+
+    # Clean up
+    doc['CUP'] = list(doc['CUP'])[0] if len(doc['CUP']) > 0 else ''
+    doc['Coords'] = json.dumps(doc['Coords'])
+    doc['Acres'] = json.dumps(doc['Acres'])
 
     # Connect to database
     db = dumptruck.DumpTruck(dbname = '/tmp/wetlands.db')
