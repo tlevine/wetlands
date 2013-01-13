@@ -1,3 +1,6 @@
 #!/bin/sh
 
-python2 "$WETLANDS_ROOT/src/public_notice.py" $@
+permitApplicationNumber="$1"
+
+cat $(readlink -f "$WETLANDS_ROOT/pdfs/$permitApplicationNumber/public_notice.pdf").txt |
+python2 "$WETLANDS_ROOT/src/public_notice.py" $permitApplicationNumber
