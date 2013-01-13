@@ -2,4 +2,4 @@
 
 python2 "$WETLANDS_ROOT/src/listing.py"
 for permitApplicationNumber in $(sqlite3 /tmp/wetlands.db 'SELECT permitApplicationNumber FROM application WHERE pdfParsed = 0;'); do
-    $(readlink -f $WETLANDS_ROOT/public_notice.pdf")
+    python2 "$WETLANDS_ROOT/src/public_notice.py" "$permitApplicationNumber"

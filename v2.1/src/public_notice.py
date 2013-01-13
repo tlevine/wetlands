@@ -1,48 +1,23 @@
 # -*- encoding: utf-8 -*-
 import re
+import dumptruck
 
 def main():
     import sys
     # Read input
-    permit, papertype = sys.argv[1:]
+    permit = sys.argv[1:]
     text = sys.stdin.read()
 
     # Parse
     doc = read_public_notice(text)
-    doc['_id'] = permit
     doc['permitApplicationNumber'] = permit
+    doc['pdfParsed'] = 1
 
     # Connect to database
-    import pymongo
-    connection = pymongo.Connection('localhost')
-    db = connection.wetlands
+    db = Dumptruck(dbname = '/tmp/wetlands.db')
 
-    # Things based on paper type the collection
-    if papertype == 'public_notice':
-        doc['CUP'] = list(doc['CUP'])
-        collection = db.public_notice
-    elif papertype == 'drawings':
-        collection = db.drawings
-    else:
-        raise ValueError(
-            'Paper type must be one of "public_notice" or "drawings"; ' +
-            papertype + ' is not allowed.'
-        )
-
-    # Save
-    collection.insert(doc)
-
-    # Database column names (arg why did I use different ones...)
-    paperType = {
-        'public_notice': 'publicNotice',
-        'drawings': 'drawings',
-    }[papertype]
-
-    # Mark as processed
-    db.permit.update(
-        {"_id": permit},
-        {"$set": {paperType + ".processed": True }}
-    )
+    # Update the document; upsert updates the specified columns
+    db.upsert(doc, 'application')
 
 def read_public_notice(rawtext):
     "Get everything from the notice."

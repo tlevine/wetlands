@@ -11,7 +11,7 @@ Handling null values:
 
 import os
 import unittest
-from pdf import read_public_notice, \
+from public_notice import read_public_notice, \
     _read_coords, _convert_coords, \
     _read_wqc_number, \
     _read_cup_number, \
