@@ -25,7 +25,7 @@ def main():
     # Update the document; upsert updates the specified columns
     db.upsert(doc, 'application')
 
-    print doc
+    # print doc
 
 def read_public_notice(rawtext):
     "Get everything from the notice."

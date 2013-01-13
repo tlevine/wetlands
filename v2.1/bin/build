@@ -9,5 +9,6 @@ sqlite3 /tmp/wetlands.db < "$WETLANDS_ROOT/schema.sql"
 
 # Public notice
 for permitApplicationNumber in $(sqlite3 /tmp/wetlands.db 'SELECT permitApplicationNumber FROM application WHERE pdfParsed IS NULL;'); do
+    echo "$permitApplicationNumber"
     build_public_notice "$permitApplicationNumber"
 done
