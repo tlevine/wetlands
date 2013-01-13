@@ -22,6 +22,10 @@ This builds the databases.
     . activate
     build
 
+This builds just one pdf
+
+    build_public_notice [permitApplicationNumber]
+
 ### Construction process
 It opens the files contained in `listings` and `pdfs` and then generates two
 tables (fat and skinny) in three formats (sqlite3, json and csv), for a total
