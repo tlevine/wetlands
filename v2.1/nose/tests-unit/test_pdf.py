@@ -206,6 +206,7 @@ class TestReadPublicNotice(unittest.TestCase):
     def test_keys(self):
         observed = set(self.data.keys())
         expected = {
+            # Special things
             'WQC',
             'CUP',
             'Acres',
@@ -222,6 +223,7 @@ class TestReadPublicNotice(unittest.TestCase):
             'Section 10',
             'Section 404',
 
+            # Error messages
             'CUPException',
             'WQCException',
             'CoordsException',
