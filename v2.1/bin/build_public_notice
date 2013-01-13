@@ -1,0 +1,3 @@
+#!/bin/sh
+
+python2 "$WETLANDS_ROOT/src/public_notice.py" $@
