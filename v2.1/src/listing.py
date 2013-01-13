@@ -238,3 +238,7 @@ def main():
         data = listing_parse(f.read())
         f.close()
         dt.upsert(data, 'application')
+
+
+if __name__== "__main__":
+    main()

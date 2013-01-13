@@ -5,7 +5,7 @@ import dumptruck
 def main():
     import sys
     # Read input
-    permit = sys.argv[1:]
+    permit = sys.argv[1]
     text = sys.stdin.read()
 
     # Parse
@@ -14,10 +14,12 @@ def main():
     doc['pdfParsed'] = 1
 
     # Connect to database
-    db = Dumptruck(dbname = '/tmp/wetlands.db')
+    db = dumptruck.DumpTruck(dbname = '/tmp/wetlands.db')
 
     # Update the document; upsert updates the specified columns
     db.upsert(doc, 'application')
+
+    print doc
 
 def read_public_notice(rawtext):
     "Get everything from the notice."
