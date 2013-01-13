@@ -8,6 +8,6 @@ sqlite3 /tmp/wetlands.db < "$WETLANDS_ROOT/schema.sql"
 python2 "$WETLANDS_ROOT/src/listing.py"
 
 # Public notice
-for permitApplicationNumber in $(sqlite3 /tmp/wetlands.db 'SELECT permitApplicationNumber FROM application WHERE pdfParsed != 1;'); do
+for permitApplicationNumber in $(sqlite3 /tmp/wetlands.db 'SELECT permitApplicationNumber FROM application WHERE pdfParsed IS NULL;'); do
     build_public_notice "$permitApplicationNumber"
 done
