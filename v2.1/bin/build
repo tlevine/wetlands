@@ -5,7 +5,7 @@ set -e
 sqlite3 /tmp/wetlands.db < "$WETLANDS_ROOT/schema.sql"
 
 # Listing
-python2 "$WETLANDS_ROOT/src/listing.py"
+# python2 "$WETLANDS_ROOT/src/listing.py"
 
 # Public notice
 for permitApplicationNumber in $(sqlite3 /tmp/wetlands.db 'SELECT permitApplicationNumber FROM application WHERE pdfParsed IS NULL;'); do

@@ -48,6 +48,10 @@ is can tell what has already been processed and avoid processing it.
 The cache doesn't work if you've changed the schema; delete `data/fat.db` if
 that happens.
 
+If you want to clear just the pdf cache, run this
+
+    sqlite3 /tmp/wetlands.db 'update application set pdfParsed = NULL'
+
 ## Serve
 
 Serve the website like so.
